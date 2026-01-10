@@ -1,0 +1,32 @@
+let
+    GlossarioMetricas = #table(
+        {"Métrica", "Definição", "Fórmula DAX"},
+        {
+            {"Total Atendimentos", "Soma total de episódios de urgência hospitalar no período analisado", "SUM(FactAtendimentosUrgencia[TotalAtendimentos])"},
+            {"Atendimentos Não Urgentes", "Soma dos episódios classificados como não urgentes (Verde, Azul, Branca)", "[Atendimentos Verde] + [Atendimentos Azul] + [Atendimentos Branca]"},
+            {"% Não Urgentes", "Percentagem de atendimentos classificados como não urgentes", "DIVIDE([Atendimentos Não Urgentes], [Total Atendimentos], 0)"},
+            {"Custo Desperdiçado com Não Urgentes", "Valor financeiro desperdiçado por casos não urgentes (Diferencial 150€ vs 30€)", "VAR AtendimentosNaoUrgentes = [Atendimentos Não Urgentes]; VAR CustoUrgencia = 150; VAR CustoCentroSaude = 30; VAR DiferencaCusto = CustoUrgencia - CustoCentroSaude; RETURN AtendimentosNaoUrgentes * DiferencaCusto"},
+            {"Despesa Total Estimada", "Estimativa da despesa total das urgências hospitalares (Base 150€/episódio)", "[Total Atendimentos] * 150"},
+            {"Desperdício Potencial", "Valor potencialmente desperdiçado por atendimentos não urgentes (120€/episódio)", "[Atendimentos Não Urgentes] * 120"},
+            {"Tempo Espera Médio", "Média dos tempos de espera entre triagem e observação", "CALCULATE(AVERAGE(FactMonitorizacaoSazonal[Valor]), DimIndicador[IndicadorNome] = ""Tempo Médio Espera Triagem-Observação"")"},
+            {"% Acima Meta 60min", "Percentagem de episódios com tempo de espera superior a 60 minutos", "VAR TotalLinhas = CALCULATE(COUNTROWS(FactMonitorizacaoSazonal), DimIndicador[IndicadorNome] = ""Tempo Médio Espera Triagem-Observação""); VAR LinhasAcima60 = CALCULATE(COUNTROWS(FactMonitorizacaoSazonal), FactMonitorizacaoSazonal[Valor] > 60, DimIndicador[IndicadorNome] = ""Tempo Médio Espera Triagem-Observação""); RETURN DIVIDE(LinhasAcima60, TotalLinhas, 0)"},
+            {"Total Médicos", "Soma total de médicos", "SUM(FactAtendimentosUrgencia[Médicos])"},
+            {"Total Médicos Internos", "Soma total de médicos internos", "SUM(FactAtendimentosUrgencia[MedicosInternos])"},
+            {"Total Enfermeiros", "Soma total de enfermeiros", "SUM(FactAtendimentosUrgencia[Enfermeiros])"},
+            {"Total Profissionais", "Soma total de médicos, internos e enfermeiros", "[Total Médicos] + [Total Médicos Internos] + [Total Enfermeiros]"},
+            {"Atendimentos por Médico", "Média de atendimentos realizados por cada médico", "DIVIDE([Total Atendimentos], [Total Médicos], 0)"},
+            {"Score Ineficiência Global", "Índice ponderado (40% Não Urgentes, 30% Espera, 15% Produtividade, 15% Custo Desperdiçado)", "VAR Score_NaoUrgentes = [% Não Urgentes] * 40; VAR Score_TempoEspera = MIN(DIVIDE([Tempo Espera Médio], 120, 0), 1) * 30; VAR Score_Produtividade = IF([Registros com RH] > 0, (1 - MIN(DIVIDE([Atendimentos por Médico], 500, 0), 1)) * 15, 0); VAR Score_Custos = MIN(DIVIDE([Custo Desperdiçado com Não Urgentes], [Despesa Efetiva], 0), 1) * 15; RETURN Score_NaoUrgentes + Score_TempoEspera + Score_Produtividade + Score_Custos"},
+            {"Status Urgências Falsas", "Classificação do estado das urgências falsas por instituição", "SWITCH(TRUE(), [% Não Urgentes] < 0.25, ""✅ Eficiente (< 25%)"", [% Não Urgentes] < 0.35, ""⚠️ Atenção (25-35%)"", ""❌ Crítico (> 35%)"")"},
+            {"Status Rácio Enfermeiro/Médico", "Classificação do rácio de enfermeiros por médico", "SWITCH(TRUE(), [Rácio Enfermeiro/Médico] < 1.5, ""🔴 CRÍTICO"", [Rácio Enfermeiro/Médico] < 2.0, ""🟡 ABAIXO DA META"", ""🟢 ADEQUADO"")"},
+            {"Ranking Score Ineficiência", "Ranking das instituições por Score Ineficiência Global", "RANKX(ALL(DimInstituicao[InstituicaoNome]), [Score Ineficiência Global], , DESC, DENSE)"},
+            {"Ranking Produtividade", "Ranking das instituições por produtividade médica", "RANKX(ALL(DimInstituicao[InstituicaoNome]), [Atendimentos por Profissional], , DESC, DENSE)"},
+            {"Picos Sazonais por Região", "Tabela dos maiores volumes de atendimentos por região e estação", "(Consultar tabela de picos no relatório)"},
+            {"Atendimentos por Tipo de Dia", "Distribuição dos atendimentos por dia útil, fim de semana e feriado", "(Consultar visualização por tipo de dia)"},
+            {"Taxa Cobertura RH", "Percentagem de registros com dados válidos de recursos humanos (Médicos > 0 E Enfermeiros > 0)", "DIVIDE([Registros com RH Válido], COUNTROWS(FactAtendimentosUrgencia), 0)"},
+            {"Registros com RH Válido", "Número de registros com dados válidos de recursos humanos", "CALCULATE(COUNTROWS(FactAtendimentosUrgencia), FactAtendimentosUrgencia[Medicos] > 0, FactAtendimentosUrgencia[Enfermeiros] > 0)"},
+            {"Instituições Sem RH", "Número de instituições sem dados de recursos humanos", "CALCULATE(DISTINCTCOUNT(FactAtendimentosUrgencia[InstituicaoID]), FILTER(ALL(FactAtendimentosUrgencia), FactAtendimentosUrgencia[Medicos] = 0 || FactAtendimentosUrgencia[Enfermeiros] = 0))"},
+            {"Validação Total Atendimentos", "Diferença absoluta entre soma das triagens e total reportado (formato numérico, 0 = validado)", "VAR SomaTriagens = [Atendimentos Vermelha] + [Atendimentos Laranja] + [Atendimentos Amarela] + [Atendimentos Verde] + [Atendimentos Azul] + [Atendimentos Branca] + [Atendimentos Sem Triagem]; VAR Diferenca = ABS([Total Atendimentos] - SomaTriagens); RETURN Diferenca"}
+        }
+    )
+in
+    GlossarioMetricas
