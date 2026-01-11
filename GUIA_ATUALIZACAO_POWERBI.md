@@ -39,11 +39,11 @@ python atualizar_dados_sns.py
    ![Botão Atualizar](imagem: botão circular com seta)
 
 3. Aguardar conclusão (5-10 segundos)
-4. ✅ Pronto! Dados atualizados, configurações mantidas
+4. Dados atualizados, configurações mantidas
 
 ---
 
-## 📋 Método 2: Atualização Manual
+## Método 2: Atualização Manual
 
 Se preferir descarregar manualmente do portal:
 
