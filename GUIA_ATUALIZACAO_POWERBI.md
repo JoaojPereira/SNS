@@ -75,7 +75,7 @@ Igual ao Método 1, Passo 2
 
 ---
 
-## 🔧 Resolução de Problemas
+## Resolução de Problemas
 
 ### Erro: "Não foi possível localizar a origem de dados"
 
@@ -117,9 +117,9 @@ Igual ao Método 1, Passo 2
 
 ---
 
-## ⚠️ Cuidados Importantes
+## Cuidados Importantes
 
-### ❌ NÃO FAZER:
+### NÃO FAZER:
 
 1. **Mudar nomes de colunas manualmente**
    - Medidas DAX deixam de funcionar
@@ -132,7 +132,7 @@ Igual ao Método 1, Passo 2
 3. **Adicionar/remover colunas sem ajustar DAX**
    - Pode causar erros em medidas calculadas
 
-### ✅ FAZER:
+### FAZER:
 
 1. **Sempre criar backup antes de atualizar**
    - Script já faz automaticamente
