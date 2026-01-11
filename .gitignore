@@ -32,3 +32,8 @@ $RECYCLE.BIN/
 
 # Logs
 *.log
+# Relatórios
+*.html
+RELATÓRIO*.txt
+Relatorio_*.md
+Relatorio_*.html
