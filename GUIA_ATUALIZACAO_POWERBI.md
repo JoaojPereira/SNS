@@ -250,7 +250,7 @@ RETURN LinhasAtuais - LinhasAnteriores
 ## Suporte
 
 ### Recursos:
-- **Documentação:** `ANALISE_SCRIPTS.md`
+- **Documentação: 'scripts_history/README.md`
 
 ### Contactos:
 - Portal SNS: https://transparencia.sns.gov.pt
