@@ -3,7 +3,7 @@
 
 ---
 
-## 🎯 Objetivo
+## Objetivo
 
 Atualizar os dados do dashboard mantendo **100%** das configurações:
 - ✅ Medidas DAX
@@ -16,12 +16,12 @@ Atualizar os dados do dashboard mantendo **100%** das configurações:
 
 ---
 
-## 📋 Método 1: Atualização Automática (Recomendado)
+## Método 1: Atualização Automática (Recomendado)
 
 ### Passo 1: Executar o Script de Atualização
 
 ```powershell
-cd "D:\Ambiente de trabalho\TransformacaoBi\sns_dashboard\sns\scripts_history"
+cd "sns_dashboard\sns\scripts_history"
 python atualizar_dados_sns.py
 ```
 
@@ -149,7 +149,7 @@ Igual ao Método 1, Passo 2
 
 ---
 
-## 📊 Vantagens da Atualização Automática
+## Vantagens da Atualização Automática
 
 ### Power BI mantém automaticamente:
 
@@ -167,7 +167,7 @@ Igual ao Método 1, Passo 2
 
 ---
 
-## 🔄 Agendamento Automático (Opcional)
+## Agendamento Automático (Opcional)
 
 ### Para atualização periódica sem intervenção:
 
@@ -199,7 +199,7 @@ Register-ScheduledTask -TaskName "Atualizar Dados SNS" -Action $action -Trigger 
 
 ---
 
-## 📝 Checklist de Atualização
+## Checklist de Atualização
 
 Antes de atualizar:
 - [ ] Fazer backup do ficheiro `.pbix`
@@ -221,7 +221,7 @@ Após atualização:
 
 ---
 
-## 💡 Dicas Profissionais
+## Dicas Profissionais
 
 ### 1. Documentar última atualização
 Adicionar text box no dashboard:
@@ -247,7 +247,7 @@ RETURN LinhasAtuais - LinhasAnteriores
 
 ---
 
-## 🆘 Suporte
+## Suporte
 
 ### Recursos:
 - **Scripts:** Pasta `scripts_history` tem 42 scripts de referência
