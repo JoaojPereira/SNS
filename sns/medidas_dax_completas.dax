@@ -1,0 +1,764 @@
+// ============================================================================
+// MEDIDAS DAX - SNS DASHBOARD - ANÁLISE DE INEFICIÊNCIAS
+// ============================================================================
+// Projeto: Dashboard SNS - Análise de Ineficiências (2016-2025)
+// Modelo: Star Schema (2 Factuais + 4 Dimensões)
+// Tabelas: fact_atendimentos_urgencia (15 colunas), fact_monitorizacao_sazonal,
+//          dim_calendar, dim_regiao, dim_instituicao, dim_indicador
+// Dados: Triagem Manchester (2016-2025) - 100% cobertura
+// Autor: João Domingues Pereira
+// Data: Dezembro 2025
+// Versão: 3.3 FINAL
+// ============================================================================
+// 
+// ESTRUTURA fact_atendimentos_urgencia (18 colunas):
+// - Colunas 1-4:   Chaves (Período, TimeKey, RegiaoID, InstituicaoID)
+// - Colunas 5-12:  Triagem Manchester (7 cores + TotalAtendimentos)
+// - Colunas 13-15: Recursos Humanos (Médicos, MedicosInternos, Enfermeiros)
+// 
+// FOCO: Análise de FALSAS URGÊNCIAS e ineficiências operacionais
+// ============================================================================
+
+
+// ============================================================================
+// 1️⃣ MÉTRICAS BÁSICAS DE ATENDIMENTO
+// ============================================================================
+
+Total Atendimentos = 
+SUM(fact_atendimentos_urgencia[TotalAtendimentos])
+
+Atendimentos Vermelha = 
+SUM(fact_atendimentos_urgencia[Atendimentos_Vermelha])
+
+Atendimentos Laranja = 
+SUM(fact_atendimentos_urgencia[Atendimentos_Laranja])
+
+Atendimentos Amarela = 
+SUM(fact_atendimentos_urgencia[Atendimentos_Amarela])
+
+Atendimentos Verde = 
+SUM(fact_atendimentos_urgencia[Atendimentos_Verde])
+
+Atendimentos Azul = 
+SUM(fact_atendimentos_urgencia[Atendimentos_Azul])
+
+Atendimentos Branca = 
+SUM(fact_atendimentos_urgencia[Atendimentos_Branca])
+
+Atendimentos Sem Triagem = 
+SUM(fact_atendimentos_urgencia[Atendimentos_SemTriagem])
+
+// Média Mensal
+Média Mensal Atendimentos = 
+AVERAGEX(
+    VALUES(dim_calendar[AnoMes]),
+    [Total Atendimentos]
+)
+
+// Média Móvel 3 Meses (SEM acumulação anual - corrige reset no gráfico)
+Média Móvel 3 Meses = 
+VAR DataAtual = LASTDATE(dim_calendar[Data])
+VAR Inicio3Meses = DATEADD(STARTOFMONTH(DataAtual), -2, MONTH)
+RETURN
+    CALCULATE(
+        AVERAGEX(
+            VALUES(dim_calendar[AnoMes]),
+            [Total Atendimentos]
+        ),
+        DATESBETWEEN(dim_calendar[Data], Inicio3Meses, DataAtual),
+        ALL(dim_calendar[Ano])  -- Remove filtro de ano para evitar quebra
+    )
+
+
+// ============================================================================
+// 2️⃣ IDENTIFICAÇÃO DE URGÊNCIAS FALSAS (INEFICIÊNCIA OPERACIONAL)
+// ============================================================================
+
+Atendimentos Urgentes = 
+[Atendimentos Vermelha] + [Atendimentos Laranja]
+
+Atendimentos Não Urgentes = 
+[Atendimentos Verde] + [Atendimentos Azul] + [Atendimentos Branca]
+
+% Não Urgentes = 
+DIVIDE([Atendimentos Não Urgentes], [Total Atendimentos], 0)
+
+% Verde/Azul = 
+DIVIDE([Atendimentos Verde] + [Atendimentos Azul], [Total Atendimentos], 0)
+
+// Semáforo de Ineficiência
+Status Urgências Falsas = 
+SWITCH(
+    TRUE(),
+    [% Não Urgentes] < 0.25, "✅ Eficiente (< 25%)",
+    [% Não Urgentes] < 0.35, "⚠️ Atenção (25-35%)",
+    "❌ Crítico (> 35%)"
+)
+
+// Estimativa de Custo Desperdiçado
+// Assumindo custo médio 120€/atendimento urgência hospitalar
+// vs 30€ em Centro de Saúde
+Custo Desperdiçado Estimado = 
+[Atendimentos Não Urgentes] * 90
+
+
+// ============================================================================
+// 3️⃣ ANÁLISE DE CUSTOS E INEFICIÊNCIA FINANCEIRA
+// ============================================================================
+
+
+// NOVA LÓGICA: Custo estimado por episódio de urgência
+Custo Estimado por Episódio = 150
+
+Despesa Total Estimada = 
+[Total Atendimentos] * [Custo Estimado por Episódio]
+
+Custo Médio por Doente = 
+[Custo Estimado por Episódio]
+
+Custo por Atendimento = 
+[Custo Estimado por Episódio]
+
+// Removidas medidas dependentes de dados reais de custos
+
+
+// ============================================================================
+// 4️⃣ INDICADORES DE RECURSOS HUMANOS
+// ============================================================================
+
+Total Médicos = 
+SUM(fact_atendimentos_urgencia[Médicos])
+
+Total Médicos Internos = 
+SUM(fact_atendimentos_urgencia[MedicosInternos])
+
+Total Enfermeiros = 
+SUM(fact_atendimentos_urgencia[Enfermeiros])
+
+Total Profissionais = 
+[Total Médicos] + [Total Médicos Internos] + [Total Enfermeiros]
+
+// Rácios
+Rácio Enfermeiro/Médico = 
+DIVIDE([Total Enfermeiros], [Total Médicos], 0)
+
+// Status Rácio (ideal: 2-3 enfermeiros por médico)
+Status Rácio Enf/Med = 
+VAR Racio = [Rácio Enfermeiro/Médico]
+RETURN
+SWITCH(
+    TRUE(),
+    Racio < 1.5, "❌ Défice Enfermeiros",
+    Racio < 2, "⚠️ Abaixo do Ideal",
+    Racio <= 3, "✅ Ideal",
+    "⚠️ Excesso Enfermeiros"
+)
+
+// Produtividade
+Atendimentos por Médico = 
+DIVIDE([Total Atendimentos], [Total Médicos], 0)
+
+Atendimentos por Enfermeiro = 
+DIVIDE([Total Atendimentos], [Total Enfermeiros], 0)
+
+Atendimentos por Profissional = 
+DIVIDE([Total Atendimentos], [Total Profissionais], 0)
+
+// Benchmark Produtividade
+Produtividade Média Nacional = 
+CALCULATE(
+    [Atendimentos por Médico],
+    ALLEXCEPT(fact_atendimentos_urgencia, dim_calendar)
+)
+
+Desvio Produtividade = 
+[Atendimentos por Médico] - [Produtividade Média Nacional]
+
+// Registros com dados de RH (92.1% cobertura)
+Registros com RH = 
+CALCULATE(
+    COUNTROWS(fact_atendimentos_urgencia),
+    fact_atendimentos_urgencia[Médicos] > 0
+)
+
+
+// ============================================================================
+// 5️⃣ ANÁLISE DE TEMPO DE ESPERA (fact_monitorizacao_sazonal)
+// ============================================================================
+
+Tempo Espera Médio = 
+CALCULATE(
+    AVERAGE(fact_monitorizacao_sazonal[Valor]),
+    dim_indicador[IndicadorNome] = "Tempo Médio Espera Triagem-Observação"
+)
+
+Taxa Verde/Azul Média = 
+CALCULATE(
+    AVERAGE(fact_monitorizacao_sazonal[Valor]),
+    dim_indicador[IndicadorNome] = "Taxa Atendimentos Verde/Azul"
+)
+
+Taxa Internamento Média = 
+CALCULATE(
+    AVERAGE(fact_monitorizacao_sazonal[Valor]),
+    dim_indicador[IndicadorNome] = "Taxa Atendimentos c/ Internamento"
+)
+
+Total Episódios = 
+CALCULATE(
+    SUM(fact_monitorizacao_sazonal[Valor]),
+    dim_indicador[IndicadorNome] = "Nº Episódios Urgência"
+)
+
+// Meta Manchester: Triagem Amarela = 60 minutos
+% Acima Meta 60min = 
+VAR TotalLinhas = 
+    CALCULATE(
+        COUNTROWS(fact_monitorizacao_sazonal),
+        dim_indicador[IndicadorNome] = "Tempo Médio Espera Triagem-Observação"
+    )
+VAR LinhasAcima60 = 
+    CALCULATE(
+        COUNTROWS(fact_monitorizacao_sazonal),
+        fact_monitorizacao_sazonal[Valor] > 60,
+        dim_indicador[IndicadorNome] = "Tempo Médio Espera Triagem-Observação"
+    )
+RETURN
+    DIVIDE(LinhasAcima60, TotalLinhas, 0)
+
+// Status Tempo de Espera
+Status Tempo Espera = 
+VAR Tempo = [Tempo Espera Médio]
+RETURN
+SWITCH(
+    TRUE(),
+    Tempo <= 60, "✅ Dentro da Meta",
+    Tempo <= 90, "⚠️ Ligeiramente Acima",
+    "❌ Crítico (> 90min)"
+)
+
+
+// ============================================================================
+// 6️⃣ ANÁLISE TEMPORAL E TENDÊNCIAS
+// ============================================================================
+
+// Variação Year-over-Year
+Variação YoY Atendimentos = 
+VAR AnoAtual = [Total Atendimentos]
+VAR AnoAnterior = 
+    CALCULATE(
+        [Total Atendimentos],
+        DATEADD(dim_calendar[Data], -1, YEAR)
+    )
+RETURN
+    DIVIDE(AnoAtual - AnoAnterior, AnoAnterior, 0)
+
+Variação YoY % Não Urgentes = 
+VAR Atual = [% Não Urgentes]
+VAR Anterior = 
+    CALCULATE(
+        [% Não Urgentes],
+        DATEADD(dim_calendar[Data], -1, YEAR)
+    )
+RETURN
+    Atual - Anterior
+
+// Mês a Mês
+Variação MoM Atendimentos = 
+VAR MesAtual = [Total Atendimentos]
+VAR MesAnterior = 
+    CALCULATE(
+        [Total Atendimentos],
+        DATEADD(dim_calendar[Data], -1, MONTH)
+    )
+RETURN
+    DIVIDE(MesAtual - MesAnterior, MesAnterior, 0)
+
+// Tendência (para visual de linha)
+Linha Tendência Não Urgentes = 
+// Usar em gráfico de linha para ver evolução temporal
+[% Não Urgentes]
+
+
+// ============================================================================
+// 7️⃣ RANKINGS E BENCHMARKING
+// ============================================================================
+
+// Ranking % Não Urgentes (1 = pior)
+Ranking Não Urgentes = 
+RANKX(
+    ALL(dim_instituicao[InstituicaoNome]),
+    [% Não Urgentes],
+    ,
+    DESC,
+    DENSE
+)
+
+// Ranking Custo (1 = mais caro)
+Ranking Custo = 
+RANKX(
+    FILTER(
+        ALL(dim_instituicao[InstituicaoNome]),
+        [Registros com Custos] > 0
+    ),
+    [Custo Médio por Doente],
+    ,
+    DESC,
+    DENSE
+)
+
+// Ranking Produtividade (1 = mais produtivo)
+Ranking Produtividade = 
+RANKX(
+    FILTER(
+        ALL(dim_instituicao[InstituicaoNome]),
+        [Registros com RH] > 0
+    ),
+    [Atendimentos por Médico],
+    ,
+    DESC,
+    DENSE
+)
+
+// Top/Bottom Flags
+É Top 10 Não Urgentes = 
+[Ranking Não Urgentes] <= 10
+
+É Bottom 10 Eficiente = 
+RANKX(
+    ALL(dim_instituicao[InstituicaoNome]),
+    [% Não Urgentes],
+    ,
+    ASC,
+    DENSE
+) <= 10
+
+
+// ============================================================================
+// 8️⃣ SCORE DE INEFICIÊNCIA GLOBAL
+// ============================================================================
+
+// Score combinado (0-100, quanto maior pior)
+Score Ineficiência Global = 
+VAR Score_NaoUrgentes = [% Não Urgentes] * 40  // Peso 40%
+VAR Score_TempoEspera = MIN(DIVIDE([Tempo Espera Médio], 120, 0), 1) * 30  // Peso 30%
+VAR Score_Produtividade = 
+    IF(
+        [Registros com RH] > 0,
+        (1 - MIN(DIVIDE([Atendimentos por Médico], 500, 0), 1)) * 15,  // Peso 15%
+        0
+    )
+VAR Score_Custos = MIN(DIVIDE([Custo Desperdiçado com Não Urgentes], [Despesa Efetiva], 0), 1) * 15  // Peso 15%
+RETURN
+    Score_NaoUrgentes + Score_TempoEspera + Score_Produtividade + Score_Custos
+    // TOTAL: 0-100 pontos
+
+// Classificação Geral
+Classificação Ineficiência = 
+VAR Score = [Score Ineficiência Global]
+RETURN
+SWITCH(
+    TRUE(),
+    Score < 20, "⭐⭐⭐⭐⭐ Excelente",
+    Score < 35, "⭐⭐⭐⭐ Bom",
+    Score < 50, "⭐⭐⭐ Satisfatório",
+    Score < 65, "⭐⭐ Atenção",
+    "⭐ Crítico"
+)
+
+
+// ============================================================================
+// 9️⃣ MEDIDAS AUXILIARES E FILTROS
+// ============================================================================
+
+// Contadores
+Total Instituições = 
+DISTINCTCOUNT(fact_atendimentos_urgencia[InstituicaoID])
+
+Total Regiões = 
+DISTINCTCOUNT(fact_atendimentos_urgencia[RegiaoID])
+
+Total Meses = 
+DISTINCTCOUNT(fact_atendimentos_urgencia[Período])
+
+// Filtro Temporal
+Primeiro Período = 
+MIN(dim_calendar[Data])
+
+Último Período = 
+MAX(dim_calendar[Data])
+
+// Flags úteis
+Tem Dados Custos = 
+IF([Registros com Custos] > 0, TRUE(), FALSE())
+
+Tem Dados RH = 
+IF([Registros com RH] > 0, TRUE(), FALSE())
+
+// Para tooltips
+Detalhe Instituição = 
+SELECTEDVALUE(dim_instituicao[InstituicaoNome], "Várias Instituições")
+
+Tipo Instituição = 
+SELECTEDVALUE(dim_instituicao[Tipo], "Vários Tipos")
+
+Região = 
+SELECTEDVALUE(dim_regiao[RegiaoNome], "Várias Regiões")
+
+
+// ============================================================================
+// 🔟 ANÁLISE POR SAZONALIDADE (dim_calendar)
+// ============================================================================
+
+// Atendimentos por Estação do Ano
+Atendimentos Inverno = 
+CALCULATE(
+    [Total Atendimentos],
+    dim_calendar[Sazonalidade] = "Inverno"
+)
+
+Atendimentos Primavera = 
+CALCULATE(
+    [Total Atendimentos],
+    dim_calendar[Sazonalidade] = "Primavera"
+)
+
+Atendimentos Verão = 
+CALCULATE(
+    [Total Atendimentos],
+    dim_calendar[Sazonalidade] = "Verão"
+)
+
+Atendimentos Outono = 
+CALCULATE(
+    [Total Atendimentos],
+    dim_calendar[Sazonalidade] = "Outono"
+)
+
+// Análise Fim de Semana vs Dias Úteis
+Atendimentos Fim Semana = 
+CALCULATE(
+    [Total Episódios],  // Da fact_monitorizacao_sazonal (granularidade diária)
+    dim_calendar[É Fim de Semana] = TRUE()
+)
+
+Atendimentos Dias Úteis = 
+CALCULATE(
+    [Total Episódios],
+    dim_calendar[Tipo de Dia] = "Dia Útil"
+)
+
+Atendimentos Feriados = 
+CALCULATE(
+    [Total Episódios],
+    dim_calendar[É Feriado] = TRUE()
+)
+
+// Comparação Fim de Semana
+% Aumento Fim Semana = 
+VAR MediaFDS = DIVIDE([Atendimentos Fim Semana], 
+    CALCULATE(DISTINCTCOUNT(dim_calendar[Data]), dim_calendar[É Fim de Semana] = TRUE()), 0)
+VAR MediaUtil = DIVIDE([Atendimentos Dias Úteis], 
+    CALCULATE(DISTINCTCOUNT(dim_calendar[Data]), dim_calendar[Tipo de Dia] = "Dia Útil"), 0)
+RETURN
+    DIVIDE(MediaFDS - MediaUtil, MediaUtil, 0)
+
+
+/ ============================================================================
+// Cobertura: Atendimentos, Custos, RH, Tempo Espera, Sazonalidade, Rankings
+// ============================================================================
+
+UPDATE
+
+
+// ============================================================================
+// MEDIDAS DE SCORE - VERSÃO SEM DADOS REAIS DE CUSTOS
+// ============================================================================
+// Como não há colunas Despesa/NumDoentes, usamos custo estimado fixo de 150€
+// ============================================================================
+
+
+// ============================================================================
+// SCORE SIMPLIFICADO (Recomendado - 3 componentes)
+// ============================================================================
+
+Score Ineficiência Simplificado = 
+VAR Score_NaoUrgentes = [% Não Urgentes] * 50  // Peso 50% (0-50 pontos)
+VAR Score_TempoEspera = MIN(DIVIDE([Tempo Espera Médio], 120, 0), 1) * 35  // Peso 35% (0-35 pontos)
+VAR Score_Produtividade = 
+    IF(
+        [Registros com RH] > 0,
+        (1 - MIN(DIVIDE([Atendimentos por Médico], 500, 0), 1)) * 15,  // Peso 15% (0-15 pontos)
+        0
+    )
+RETURN
+    Score_NaoUrgentes + Score_TempoEspera + Score_Produtividade
+    // TOTAL: 0-100 pontos
+
+
+// ============================================================================
+// CLASSIFICAÇÃO (Usar com Score Simplificado)
+// ============================================================================
+
+Classificação Ineficiência = 
+VAR Score = [Score Ineficiência Simplificado]
+RETURN
+SWITCH(
+    TRUE(),
+    Score < 20, "⭐⭐⭐⭐⭐ Excelente",
+    Score < 35, "⭐⭐⭐⭐ Bom",
+    Score < 50, "⭐⭐⭐ Satisfatório",
+    Score < 65, "⭐⭐ Atenção",
+    "⭐ Crítico"
+)
+
+
+// ============================================================================
+// ANÁLISE DE "SEM TRIAGEM" (para investigação)
+// ============================================================================
+
+% Sem Triagem = 
+DIVIDE([Atendimentos Sem Triagem], [Total Atendimentos], 0)
+
+// Cenário conservador: NÃO inclui Sem Triagem
+Atendimentos Não Urgentes (Conservador) = 
+[Atendimentos Verde] + [Atendimentos Azul] + [Atendimentos Branca]
+
+% Não Urgentes (Conservador) = 
+DIVIDE([Atendimentos Não Urgentes (Conservador)], [Total Atendimentos], 0)
+
+// Cenário pessimista: INCLUI Sem Triagem  
+Atendimentos Não Urgentes (Pessimista) = 
+[Atendimentos Verde] + [Atendimentos Azul] + [Atendimentos Branca] + [Atendimentos Sem Triagem]
+
+% Não Urgentes (Pessimista) = 
+DIVIDE([Atendimentos Não Urgentes (Pessimista)], [Total Atendimentos], 0)
+
+// Alerta se Sem Triagem > 5% (indica problema no processo)
+Alerta Sem Triagem = 
+IF(
+    [% Sem Triagem] > 0.05,
+    "⚠️ ATENÇÃO: " & FORMAT([% Sem Triagem], "0.0%") & " sem triagem (investigar)",
+    "✅ Normal (" & FORMAT([% Sem Triagem], "0.0%") & ")"
+)
+
+
+// ============================================================================
+// ANÁLISE DE CUSTOS (com valor fixo 150€)
+// ============================================================================
+
+// Custo total baseado em episódios
+Despesa Total Estimada = 
+[Total Atendimentos] * [Custo Estimado por Episódio]
+
+// Custo desperdiçado com atendimentos não urgentes
+Custo Desperdiçado com Não Urgentes = 
+VAR AtendimentosNaoUrgentes = [Atendimentos Não Urgentes]
+VAR CustoUrgencia = 150  // Urgência hospitalar
+VAR CustoCentroSaude = 30  // Centro de Saúde (estimativa)
+VAR DiferencaCusto = CustoUrgencia - CustoCentroSaude
+RETURN
+    AtendimentosNaoUrgentes * DiferencaCusto
+    // = Número de casos não urgentes × 120€ desperdiçados por caso
+
+
+// Custo desperdiçado anualizado (para projeções)
+Custo Desperdiçado Anual = 
+VAR MesesComDados = DISTINCTCOUNT(fact_atendimentos_urgencia[Período])
+VAR CustoTotal = [Custo Desperdiçado com Não Urgentes]
+RETURN
+    IF(
+        MesesComDados > 0,
+        (CustoTotal / MesesComDados) * 12,
+        0
+    )
+
+
+// ============================================================================
+// MEDIDAS AUXILIARES DE CONTAGEM (se não existirem)
+// ============================================================================
+
+Total Meses = 
+DISTINCTCOUNT(fact_atendimentos_urgencia[Período])
+
+Total Meses no Filtro = 
+COUNTROWS(
+    SUMMARIZE(
+        fact_atendimentos_urgencia,
+        fact_atendimentos_urgencia[Período]
+    )
+)
+
+
+// ============================================================================
+// MEDIDAS DE DEBUG (para verificar cálculos)
+// ============================================================================
+
+Debug Score Componentes = 
+"Não Urgentes: " & FORMAT([% Não Urgentes] * 50, "0.00") & " pts" &
+" | Tempo Espera: " & FORMAT(MIN(DIVIDE([Tempo Espera Médio], 120, 0), 1) * 35, "0.00") & " pts" &
+" | Produtividade: " & FORMAT(
+    IF([Registros com RH] > 0, (1 - MIN(DIVIDE([Atendimentos por Médico], 500, 0), 1)) * 15, 0), "0.00"
+) & " pts" &
+" | TOTAL: " & FORMAT([Score Ineficiência Simplificado], "0.00") & " pts"
+
+
+Debug % Componentes Score = 
+VAR Total = [Score Ineficiência Simplificado]
+VAR Comp1 = [% Não Urgentes] * 50
+VAR Comp2 = MIN(DIVIDE([Tempo Espera Médio], 120, 0), 1) * 35
+VAR Comp3 = IF([Registros com RH] > 0, (1 - MIN(DIVIDE([Atendimentos por Médico], 500, 0), 1)) * 15, 0)
+RETURN
+    IF(
+        Total > 0,
+        "Não Urgentes: " & FORMAT(DIVIDE(Comp1, Total, 0), "0%") &
+        " | Espera: " & FORMAT(DIVIDE(Comp2, Total, 0), "0%") &
+        " | Produtividade: " & FORMAT(DIVIDE(Comp3, Total, 0), "0%"),
+        "N/A"
+    )
+
+
+// ============================================================================
+// MEDIDAS AUXILIARES (se ainda não existem)
+// ============================================================================
+
+// Verifica se há dados de RH
+Registros com RH = 
+CALCULATE(
+    COUNTROWS(fact_atendimentos_urgencia),
+    fact_atendimentos_urgencia[Médicos] > 0
+)
+
+Tem Dados RH = 
+IF([Registros com RH] > 0, "✅ Sim", "❌ Não")
+
+
+// ============================================================================
+// REMOÇÃO: Medidas antigas que dependiam de Despesa/NumDoentes
+// ============================================================================
+
+// ❌ REMOVER do ficheiro original:
+// - Registros com Custos
+// - % Desvio Custo  
+// - Ranking Custo
+// - Score Ineficiência Global (versão com 4 componentes)
+
+// ✅ MANTER no ficheiro original:
+// - Custo Estimado por Episódio = 150
+// - Despesa Total Estimada
+// - Custo Médio por Doente (se houver)
+// - Custo por Atendimento (se houver)
+
+
+// ============================================================================
+// EXEMPLO DE USO
+// ============================================================================
+
+/*
+CARTÃO 1: Score Ineficiência Simplificado
+Resultado esperado: 0-100 (ex: 42.5)
+
+CARTÃO 2: Classificação Ineficiência  
+Resultado esperado: "⭐⭐⭐ Satisfatório"
+
+CARTÃO 3: Debug Score Componentes
+Resultado esperado: "Não Urgentes: 17.50 pts | Tempo Espera: 15.75 pts | Produtividade: 9.25 pts | TOTAL: 42.50 pts"
+
+CARTÃO 4: Custo Desperdiçado com Não Urgentes
+Resultado esperado: 2.400.000 (em euros)
+*/
+
+// ============================================================================
+// 🆕 MELHORIAS E VALIDAÇÕES (Dezembro 2025)
+// ============================================================================
+
+// VALIDAÇÃO: Verificar integridade dos dados
+Validação Total Atendimentos = 
+VAR SomaCores = 
+    [Atendimentos Vermelha] + [Atendimentos Laranja] + [Atendimentos Amarela] +
+    [Atendimentos Verde] + [Atendimentos Azul] + [Atendimentos Branca] + 
+    [Atendimentos Sem Triagem]
+VAR Diferenca = ABS([Total Atendimentos] - SomaCores)
+RETURN Diferenca
+
+// MELHORIA: Total sem casos não triados (mais preciso)
+Total Atendimentos Triados = 
+[Total Atendimentos] - [Atendimentos Sem Triagem]
+
+// MELHORIA: % Não Urgentes ajustado (excluindo sem triagem)
+% Não Urgentes (Ajustado) = 
+DIVIDE([Atendimentos Não Urgentes], [Total Atendimentos Triados], 0)
+
+// MELHORIA: Total de Médicos válidos (>0)
+Total Médicos Válidos = 
+CALCULATE(
+    SUM(fact_atendimentos_urgencia[Médicos]),
+    fact_atendimentos_urgencia[Médicos] > 0
+)
+
+// MELHORIA: Contagem de registros com RH válido
+Registros com RH Válido = 
+CALCULATE(
+    COUNTROWS(fact_atendimentos_urgencia),
+    fact_atendimentos_urgencia[Médicos] > 0,
+    fact_atendimentos_urgencia[Enfermeiros] > 0
+)
+
+// QUALIDADE: Taxa de cobertura de dados RH
+Taxa Cobertura RH = 
+DIVIDE(
+    [Registros com RH Válido],
+    COUNTROWS(fact_atendimentos_urgencia),
+    0
+)
+
+// MELHORIA: Atendimentos por Médico (apenas registros válidos)
+Atendimentos por Médico (Válido) = 
+VAR AtendimentosComRH = 
+    CALCULATE(
+        [Total Atendimentos],
+        fact_atendimentos_urgencia[Médicos] > 0
+    )
+VAR MedicosValidos = [Total Médicos Válidos]
+RETURN
+    DIVIDE(AtendimentosComRH, MedicosValidos, 0)
+
+// ANÁLISE: Instituições sem dados RH
+Instituições Sem RH = 
+CALCULATE(
+    DISTINCTCOUNT(fact_atendimentos_urgencia[InstituicaoID]),
+    fact_atendimentos_urgencia[Médicos] = 0,
+    fact_atendimentos_urgencia[Enfermeiros] = 0
+)
+
+// ANÁLISE: Total de registros
+Total Registros = 
+COUNTROWS(fact_atendimentos_urgencia)
+
+// BENCHMARK: Comparação com média nacional
+Desvio da Média Nacional (Não Urgentes) = 
+VAR MediaNacional = 
+    CALCULATE(
+        [% Não Urgentes],
+        ALL(dim_instituicao)
+    )
+VAR ValorAtual = [% Não Urgentes]
+RETURN
+    ValorAtual - MediaNacional
+
+// BENCHMARK: Status comparativo
+Status vs Média Nacional = 
+VAR Desvio = [Desvio da Média Nacional (Não Urgentes)]
+RETURN
+    SWITCH(
+        TRUE(),
+        Desvio < -0.10, "🟢 Muito Abaixo (-10pp)",
+        Desvio < 0, "🟡 Abaixo da Média",
+        Desvio < 0.10, "🟠 Acima da Média",
+        "🔴 Muito Acima (+10pp)"
+    )
+
+// ============================================================================
+// FIM DO FICHEIRO
+// ============================================================================
+
