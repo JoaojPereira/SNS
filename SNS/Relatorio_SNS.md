@@ -49,9 +49,9 @@ Este relatório apresenta a análise definitiva das ineficiências operacionais,
 Os dados foram extraídos do Portal da Transparência do SNS e submetidos a um rigoroso processo de limpeza e filtragem.
 - **Período Final:** 2016-2025 (Dados anteriores a 2016 foram excluídos para garantir consistência e relevância estatística).
 - **Datasets Utilizados:**
-    - `FactAtendimentosUrgencia_Mensal.csv` (4.131 registos mensais consolidados).
-    - `FactMonitorizacaosazonal.csv` (32.870 registos diários).
-    - `trabalhadores-por-grupo-profissional.csv` (Dados de RH).
+    - `csv/fact_atendimentos_urgencia_mensal.csv` (4.131 registos mensais consolidados).
+    - `csv/fact_monitorizacao_sazonal.csv` (32.870 registos diários).
+    - `csv/trabalhadores_grupo_profissional.csv` (Dados de RH).
 
 ### 2.2 Exclusão da Tabela de Custos Reais
 A tabela original `custo-de-tratamento-mensal-por-doente.csv` foi **EXCLUÍDA** da análise final.

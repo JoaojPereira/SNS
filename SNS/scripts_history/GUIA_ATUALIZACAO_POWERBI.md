@@ -21,7 +21,7 @@ Atualizar os dados do dashboard mantendo **100%** das configurações:
 ### Passo 1: Executar o Script de Atualização
 
 ```powershell
-cd "D:\Ambiente de trabalho\TransformacaoBi\Report de Ineficiências nas Urgências Hospitalares"
+cd "D:\Ambiente de trabalho\TransformacaoBi\sns"
 python atualizar_dados_sns.py
 ```
 
@@ -51,9 +51,9 @@ Se preferir descarregar manualmente do portal:
 
 1. Aceder: https://transparencia.sns.gov.pt/explore/?sort=modified
 2. Procurar datasets:
-   - `atendimentos-em-urgencia-triagem-manchester`
-   - `trabalhadores-por-grupo-profissional`
-   - `monitorizacao-sazonal-csh.csv`
+   - `csv/atendimentos_urgencia_triagem_manchester`
+   - `csv/trabalhadores_grupo_profissional`
+   - `csv/monitorizacao_sazonal_csh.csv`
 3. Clicar em "Exportar" → "CSV" (com separador `;`)
 
 ### Passo 2: Normalizar com Script
@@ -65,9 +65,9 @@ python normalizar_csv_completo.py
 ### Passo 3: Substituir Ficheiros
 
 **IMPORTANTE:** Usar os mesmos nomes:
-- `atendimentos-em-urgencia-triagem-manchester.csv`
-- `trabalhadores-por-grupo-profissional.csv`
-- `monitorizacao-sazonal-csh.csv`
+- `csv/atendimentos_urgencia_triagem_manchester.csv`
+- `csv/trabalhadores_grupo_profissional.csv`
+- `csv/monitorizacao_sazonal_csh.csv`
 
 ### Passo 4: Atualizar no Power BI
 
@@ -192,7 +192,7 @@ Igual ao Método 1, Passo 2
 
 ```powershell
 # Criar task mensal
-$action = New-ScheduledTaskAction -Execute "python" -Argument "atualizar_dados_sns.py" -WorkingDirectory "D:\Ambiente de trabalho\TransformacaoBi\Report de Ineficiências nas Urgências Hospitalares"
+$action = New-ScheduledTaskAction -Execute "python" -Argument "atualizar_dados_sns.py" -WorkingDirectory "D:\Ambiente de trabalho\TransformacaoBi\sns"
 $trigger = New-ScheduledTaskTrigger -Monthly -At 2am -DaysOfMonth 15
 Register-ScheduledTask -TaskName "Atualizar Dados SNS" -Action $action -Trigger $trigger
 ```

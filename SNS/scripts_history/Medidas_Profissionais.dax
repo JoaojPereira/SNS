@@ -2,7 +2,7 @@
 // MEDIDAS - RECURSOS HUMANOS E PRODUTIVIDADE
 // ============================================================================
 // Modelo: Star Schema
-// Tabelas: FactAtendimentosUrgencia, FactCustos, DimProfissionais
+// Tabelas: fact_atendimentos_urgencia, FactCustos, DimProfissionais
 // Cobertura RH: 92.1% dos registos (4.271 de 4.636 linhas)
 // ============================================================================
 
@@ -15,13 +15,13 @@ Total Profissionais =
     [Total Médicos] + [Total Médicos Internos] + [Total Enfermeiros]
 
 Total Médicos = 
-    SUM(FactAtendimentosUrgencia[Médicos])
+    SUM(fact_atendimentos_urgencia[Médicos])
 
 Total Médicos Internos = 
-    SUM(FactAtendimentosUrgencia[MedicosInternos])
+    SUM(fact_atendimentos_urgencia[MedicosInternos])
 
 Total Enfermeiros = 
-    SUM(FactAtendimentosUrgencia[Enfermeiros])
+    SUM(fact_atendimentos_urgencia[Enfermeiros])
 
 Total Médicos Completo = 
     [Total Médicos] + [Total Médicos Internos]
@@ -82,8 +82,8 @@ Rácio Enfermeiro/Médico - Média Nacional =
     VAR _MediaNacional = 
         CALCULATE(
             [Rácio Enfermeiro/Médico],
-            ALL(DimInstituicao),
-            ALL(DimRegiao)
+            ALL(dim_instituicao),
+            ALL(dim_regiao)
         )
     RETURN
         _RacioAtual - _MediaNacional
@@ -93,8 +93,8 @@ Atendimentos por Profissional - Média Nacional =
     VAR _MediaNacional = 
         CALCULATE(
             [Atendimentos por Profissional],
-            ALL(DimInstituicao),
-            ALL(DimRegiao)
+            ALL(dim_instituicao),
+            ALL(dim_regiao)
         )
     RETURN
         _AtendAtual - _MediaNacional
@@ -104,8 +104,8 @@ Produtividade vs Nacional (%) =
     VAR _Nacional = 
         CALCULATE(
             [Atendimentos por Profissional],
-            ALL(DimInstituicao),
-            ALL(DimRegiao)
+            ALL(dim_instituicao),
+            ALL(dim_regiao)
         )
     RETURN
         DIVIDE(_Atual - _Nacional, _Nacional, 0)
@@ -138,8 +138,8 @@ Custo por Profissional - Média Nacional =
     VAR _MediaNacional = 
         CALCULATE(
             [Custo por Profissional],
-            ALL(DimInstituicao),
-            ALL(DimRegiao)
+            ALL(dim_instituicao),
+            ALL(dim_regiao)
         )
     RETURN
         _CustoAtual - _MediaNacional
@@ -154,7 +154,7 @@ Score Eficiência RH =
     VAR _MediaAtendPorProf = 
         CALCULATE(
             [Atendimentos por Profissional],
-            ALL(DimInstituicao)
+            ALL(dim_instituicao)
         )
     VAR _RacioAtual = [Rácio Enfermeiro/Médico]
     VAR _RacioIdeal = 2.0
@@ -168,7 +168,7 @@ Score Produtividade =
     VAR _Media = 
         CALCULATE(
             [Atendimentos por Profissional],
-            ALL(DimInstituicao)
+            ALL(dim_instituicao)
         )
     RETURN
         DIVIDE(_Atual, _Media, 0) * 100
@@ -220,7 +220,7 @@ Alerta RH =
     VAR _MediaNacional = 
         CALCULATE(
             [Atendimentos por Profissional],
-            ALL(DimInstituicao)
+            ALL(dim_instituicao)
         )
     RETURN
         IF(_AtendPorProf < _MediaNacional * 0.8, "⚠️ Produtividade < 80% média", "✅ OK")
@@ -230,7 +230,7 @@ Alerta RH =
     VAR _MediaNacional = 
         CALCULATE(
             [Custo por Profissional],
-            ALL(DimInstituicao)
+            ALL(dim_instituicao)
         )
     RETURN
         IF(_CustoPorProf > _MediaNacional * 1.2, "⚠️ Custo > 120% média", "✅ OK")
@@ -243,7 +243,7 @@ Alerta RH =
 Total Profissionais Ano Anterior = 
     CALCULATE(
         [Total Profissionais],
-        SAMEPERIODLASTYEAR(DimCalendar[Data])
+        SAMEPERIODLASTYEAR(dim_calendar[Data])
     )
 
 Variação YoY Profissionais = 
@@ -261,7 +261,7 @@ Variação YoY Médicos =
     VAR _Anterior = 
         CALCULATE(
             [Total Médicos],
-            SAMEPERIODLASTYEAR(DimCalendar[Data])
+            SAMEPERIODLASTYEAR(dim_calendar[Data])
         )
     RETURN
         DIVIDE(_Atual - _Anterior, _Anterior, 0)
@@ -271,7 +271,7 @@ Variação YoY Enfermeiros =
     VAR _Anterior = 
         CALCULATE(
             [Total Enfermeiros],
-            SAMEPERIODLASTYEAR(DimCalendar[Data])
+            SAMEPERIODLASTYEAR(dim_calendar[Data])
         )
     RETURN
         DIVIDE(_Atual - _Anterior, _Anterior, 0)
@@ -281,7 +281,7 @@ Variação % Custo por Profissional YoY =
     VAR _AnoAnterior = 
         CALCULATE(
             [Custo por Profissional],
-            SAMEPERIODLASTYEAR(DimCalendar[Data])
+            SAMEPERIODLASTYEAR(dim_calendar[Data])
         )
     RETURN
         DIVIDE(_AnoAtual - _AnoAnterior, _AnoAnterior, BLANK())
@@ -295,12 +295,12 @@ Tem Dados RH =
     IF([Total Profissionais] > 0, "SIM", "NÃO")
 
 % Registos com Dados RH = 
-    VAR _TotalRegistos = COUNTROWS(FactAtendimentosUrgencia)
+    VAR _TotalRegistos = COUNTROWS(fact_atendimentos_urgencia)
     VAR _RegistrosComRH = 
         CALCULATE(
-            COUNTROWS(FactAtendimentosUrgencia),
-            FactAtendimentosUrgencia[Médicos] > 0 || 
-            FactAtendimentosUrgencia[Enfermeiros] > 0
+            COUNTROWS(fact_atendimentos_urgencia),
+            fact_atendimentos_urgencia[Médicos] > 0 || 
+            fact_atendimentos_urgencia[Enfermeiros] > 0
         )
     RETURN
         DIVIDE(_RegistrosComRH, _TotalRegistos, 0)
@@ -330,7 +330,7 @@ Défice Enfermeiros Estimado =
 
 Ranking Produtividade = 
     RANKX(
-        ALL(DimInstituicao[InstituicaoNome]),
+        ALL(dim_instituicao[InstituicaoNome]),
         [Atendimentos por Profissional],
         ,
         DESC,
@@ -339,7 +339,7 @@ Ranking Produtividade =
 
 Ranking Rácio Enfermeiro/Médico = 
     RANKX(
-        ALL(DimInstituicao[InstituicaoNome]),
+        ALL(dim_instituicao[InstituicaoNome]),
         [Rácio Enfermeiro/Médico],
         ,
         DESC,
@@ -348,7 +348,7 @@ Ranking Rácio Enfermeiro/Médico =
 
 Top 20% Produtividade = 
     IF(
-        [Ranking Produtividade] <= COUNTROWS(ALL(DimInstituicao)) * 0.2,
+        [Ranking Produtividade] <= COUNTROWS(ALL(dim_instituicao)) * 0.2,
         "SIM",
         "NÃO"
     )

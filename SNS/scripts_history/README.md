@@ -33,12 +33,12 @@ python atualizar_dados_sns.py
 **Função:** Atualiza as tabelas Fact do modelo Star Schema
 
 **O que faz:**
-- Lê os CSVs atualizados
+- Lê os CSVs da pasta csv/
 - Filtra apenas dados de 2016 em diante (remove 2013-2015)
-- Mapeia instituições usando tabela DimInstituicao com cache de performance
+- Mapeia instituições usando tabela dim_instituicao com cache de performance
 - Gera TimeKeys para relacionamentos temporais
-- Atualiza FactAtendimentosUrgencia_Mensal.csv (4.131 registos)
-- Atualiza FactMonitorizacaosazonal.csv (32.870 registos)
+- Atualiza csv/fact_atendimentos_urgencia_mensal.csv (4.131 registos)
+- Atualiza csv/fact_monitorizacao_sazonal.csv (32.870 registos)
 - Cria backups automáticos antes de sobrescrever
 
 **Quando usar:**

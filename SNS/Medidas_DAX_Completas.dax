@@ -1,17 +1,17 @@
 // ============================================================================
-// MEDIDAS DAX - REPORT DE INEFICIÊNCIAS NAS URGÊNCIAS HOSPITALARES SNS
+// MEDIDAS DAX - SNS DASHBOARD - ANÁLISE DE INEFICIÊNCIAS
 // ============================================================================
 // Projeto: Dashboard SNS - Análise de Ineficiências (2016-2025)
 // Modelo: Star Schema (2 Factuais + 4 Dimensões)
-// Tabelas: FactAtendimentosUrgencia (15 colunas), FactMonitorizacaoSazonal,
-//          DimCalendar, DimRegiao, DimInstituicao, DimIndicador
+// Tabelas: fact_atendimentos_urgencia (15 colunas), fact_monitorizacao_sazonal,
+//          dim_calendar, dim_regiao, dim_instituicao, dim_indicador
 // Dados: Triagem Manchester (2016-2025) - 100% cobertura
 // Autor: João Domingues Pereira
 // Data: Dezembro 2025
 // Versão: 3.3 FINAL
 // ============================================================================
 // 
-// ESTRUTURA FactAtendimentosUrgencia (18 colunas):
+// ESTRUTURA fact_atendimentos_urgencia (18 colunas):
 // - Colunas 1-4:   Chaves (Período, TimeKey, RegiaoID, InstituicaoID)
 // - Colunas 5-12:  Triagem Manchester (7 cores + TotalAtendimentos)
 // - Colunas 13-15: Recursos Humanos (Médicos, MedicosInternos, Enfermeiros)
@@ -25,48 +25,48 @@
 // ============================================================================
 
 Total Atendimentos = 
-SUM(FactAtendimentosUrgencia[TotalAtendimentos])
+SUM(fact_atendimentos_urgencia[TotalAtendimentos])
 
 Atendimentos Vermelha = 
-SUM(FactAtendimentosUrgencia[Atendimentos_Vermelha])
+SUM(fact_atendimentos_urgencia[Atendimentos_Vermelha])
 
 Atendimentos Laranja = 
-SUM(FactAtendimentosUrgencia[Atendimentos_Laranja])
+SUM(fact_atendimentos_urgencia[Atendimentos_Laranja])
 
 Atendimentos Amarela = 
-SUM(FactAtendimentosUrgencia[Atendimentos_Amarela])
+SUM(fact_atendimentos_urgencia[Atendimentos_Amarela])
 
 Atendimentos Verde = 
-SUM(FactAtendimentosUrgencia[Atendimentos_Verde])
+SUM(fact_atendimentos_urgencia[Atendimentos_Verde])
 
 Atendimentos Azul = 
-SUM(FactAtendimentosUrgencia[Atendimentos_Azul])
+SUM(fact_atendimentos_urgencia[Atendimentos_Azul])
 
 Atendimentos Branca = 
-SUM(FactAtendimentosUrgencia[Atendimentos_Branca])
+SUM(fact_atendimentos_urgencia[Atendimentos_Branca])
 
 Atendimentos Sem Triagem = 
-SUM(FactAtendimentosUrgencia[Atendimentos_SemTriagem])
+SUM(fact_atendimentos_urgencia[Atendimentos_SemTriagem])
 
 // Média Mensal
 Média Mensal Atendimentos = 
 AVERAGEX(
-    VALUES(DimCalendar[AnoMes]),
+    VALUES(dim_calendar[AnoMes]),
     [Total Atendimentos]
 )
 
 // Média Móvel 3 Meses (SEM acumulação anual - corrige reset no gráfico)
 Média Móvel 3 Meses = 
-VAR DataAtual = LASTDATE(DimCalendar[Data])
+VAR DataAtual = LASTDATE(dim_calendar[Data])
 VAR Inicio3Meses = DATEADD(STARTOFMONTH(DataAtual), -2, MONTH)
 RETURN
     CALCULATE(
         AVERAGEX(
-            VALUES(DimCalendar[AnoMes]),
+            VALUES(dim_calendar[AnoMes]),
             [Total Atendimentos]
         ),
-        DATESBETWEEN(DimCalendar[Data], Inicio3Meses, DataAtual),
-        ALL(DimCalendar[Ano])  -- Remove filtro de ano para evitar quebra
+        DATESBETWEEN(dim_calendar[Data], Inicio3Meses, DataAtual),
+        ALL(dim_calendar[Ano])  -- Remove filtro de ano para evitar quebra
     )
 
 
@@ -127,13 +127,13 @@ Custo por Atendimento =
 // ============================================================================
 
 Total Médicos = 
-SUM(FactAtendimentosUrgencia[Médicos])
+SUM(fact_atendimentos_urgencia[Médicos])
 
 Total Médicos Internos = 
-SUM(FactAtendimentosUrgencia[MedicosInternos])
+SUM(fact_atendimentos_urgencia[MedicosInternos])
 
 Total Enfermeiros = 
-SUM(FactAtendimentosUrgencia[Enfermeiros])
+SUM(fact_atendimentos_urgencia[Enfermeiros])
 
 Total Profissionais = 
 [Total Médicos] + [Total Médicos Internos] + [Total Enfermeiros]
@@ -168,7 +168,7 @@ DIVIDE([Total Atendimentos], [Total Profissionais], 0)
 Produtividade Média Nacional = 
 CALCULATE(
     [Atendimentos por Médico],
-    ALLEXCEPT(FactAtendimentosUrgencia, DimCalendar)
+    ALLEXCEPT(fact_atendimentos_urgencia, dim_calendar)
 )
 
 Desvio Produtividade = 
@@ -177,51 +177,51 @@ Desvio Produtividade =
 // Registros com dados de RH (92.1% cobertura)
 Registros com RH = 
 CALCULATE(
-    COUNTROWS(FactAtendimentosUrgencia),
-    FactAtendimentosUrgencia[Médicos] > 0
+    COUNTROWS(fact_atendimentos_urgencia),
+    fact_atendimentos_urgencia[Médicos] > 0
 )
 
 
 // ============================================================================
-// 5️⃣ ANÁLISE DE TEMPO DE ESPERA (FactMonitorizacaoSazonal)
+// 5️⃣ ANÁLISE DE TEMPO DE ESPERA (fact_monitorizacao_sazonal)
 // ============================================================================
 
 Tempo Espera Médio = 
 CALCULATE(
-    AVERAGE(FactMonitorizacaoSazonal[Valor]),
-    DimIndicador[IndicadorNome] = "Tempo Médio Espera Triagem-Observação"
+    AVERAGE(fact_monitorizacao_sazonal[Valor]),
+    dim_indicador[IndicadorNome] = "Tempo Médio Espera Triagem-Observação"
 )
 
 Taxa Verde/Azul Média = 
 CALCULATE(
-    AVERAGE(FactMonitorizacaoSazonal[Valor]),
-    DimIndicador[IndicadorNome] = "Taxa Atendimentos Verde/Azul"
+    AVERAGE(fact_monitorizacao_sazonal[Valor]),
+    dim_indicador[IndicadorNome] = "Taxa Atendimentos Verde/Azul"
 )
 
 Taxa Internamento Média = 
 CALCULATE(
-    AVERAGE(FactMonitorizacaoSazonal[Valor]),
-    DimIndicador[IndicadorNome] = "Taxa Atendimentos c/ Internamento"
+    AVERAGE(fact_monitorizacao_sazonal[Valor]),
+    dim_indicador[IndicadorNome] = "Taxa Atendimentos c/ Internamento"
 )
 
 Total Episódios = 
 CALCULATE(
-    SUM(FactMonitorizacaoSazonal[Valor]),
-    DimIndicador[IndicadorNome] = "Nº Episódios Urgência"
+    SUM(fact_monitorizacao_sazonal[Valor]),
+    dim_indicador[IndicadorNome] = "Nº Episódios Urgência"
 )
 
 // Meta Manchester: Triagem Amarela = 60 minutos
 % Acima Meta 60min = 
 VAR TotalLinhas = 
     CALCULATE(
-        COUNTROWS(FactMonitorizacaoSazonal),
-        DimIndicador[IndicadorNome] = "Tempo Médio Espera Triagem-Observação"
+        COUNTROWS(fact_monitorizacao_sazonal),
+        dim_indicador[IndicadorNome] = "Tempo Médio Espera Triagem-Observação"
     )
 VAR LinhasAcima60 = 
     CALCULATE(
-        COUNTROWS(FactMonitorizacaoSazonal),
-        FactMonitorizacaoSazonal[Valor] > 60,
-        DimIndicador[IndicadorNome] = "Tempo Médio Espera Triagem-Observação"
+        COUNTROWS(fact_monitorizacao_sazonal),
+        fact_monitorizacao_sazonal[Valor] > 60,
+        dim_indicador[IndicadorNome] = "Tempo Médio Espera Triagem-Observação"
     )
 RETURN
     DIVIDE(LinhasAcima60, TotalLinhas, 0)
@@ -248,7 +248,7 @@ VAR AnoAtual = [Total Atendimentos]
 VAR AnoAnterior = 
     CALCULATE(
         [Total Atendimentos],
-        DATEADD(DimCalendar[Data], -1, YEAR)
+        DATEADD(dim_calendar[Data], -1, YEAR)
     )
 RETURN
     DIVIDE(AnoAtual - AnoAnterior, AnoAnterior, 0)
@@ -258,7 +258,7 @@ VAR Atual = [% Não Urgentes]
 VAR Anterior = 
     CALCULATE(
         [% Não Urgentes],
-        DATEADD(DimCalendar[Data], -1, YEAR)
+        DATEADD(dim_calendar[Data], -1, YEAR)
     )
 RETURN
     Atual - Anterior
@@ -269,7 +269,7 @@ VAR MesAtual = [Total Atendimentos]
 VAR MesAnterior = 
     CALCULATE(
         [Total Atendimentos],
-        DATEADD(DimCalendar[Data], -1, MONTH)
+        DATEADD(dim_calendar[Data], -1, MONTH)
     )
 RETURN
     DIVIDE(MesAtual - MesAnterior, MesAnterior, 0)
@@ -287,7 +287,7 @@ Linha Tendência Não Urgentes =
 // Ranking % Não Urgentes (1 = pior)
 Ranking Não Urgentes = 
 RANKX(
-    ALL(DimInstituicao[InstituicaoNome]),
+    ALL(dim_instituicao[InstituicaoNome]),
     [% Não Urgentes],
     ,
     DESC,
@@ -298,7 +298,7 @@ RANKX(
 Ranking Custo = 
 RANKX(
     FILTER(
-        ALL(DimInstituicao[InstituicaoNome]),
+        ALL(dim_instituicao[InstituicaoNome]),
         [Registros com Custos] > 0
     ),
     [Custo Médio por Doente],
@@ -311,7 +311,7 @@ RANKX(
 Ranking Produtividade = 
 RANKX(
     FILTER(
-        ALL(DimInstituicao[InstituicaoNome]),
+        ALL(dim_instituicao[InstituicaoNome]),
         [Registros com RH] > 0
     ),
     [Atendimentos por Médico],
@@ -326,7 +326,7 @@ RANKX(
 
 É Bottom 10 Eficiente = 
 RANKX(
-    ALL(DimInstituicao[InstituicaoNome]),
+    ALL(dim_instituicao[InstituicaoNome]),
     [% Não Urgentes],
     ,
     ASC,
@@ -373,20 +373,20 @@ SWITCH(
 
 // Contadores
 Total Instituições = 
-DISTINCTCOUNT(FactAtendimentosUrgencia[InstituicaoID])
+DISTINCTCOUNT(fact_atendimentos_urgencia[InstituicaoID])
 
 Total Regiões = 
-DISTINCTCOUNT(FactAtendimentosUrgencia[RegiaoID])
+DISTINCTCOUNT(fact_atendimentos_urgencia[RegiaoID])
 
 Total Meses = 
-DISTINCTCOUNT(FactAtendimentosUrgencia[Período])
+DISTINCTCOUNT(fact_atendimentos_urgencia[Período])
 
 // Filtro Temporal
 Primeiro Período = 
-MIN(DimCalendar[Data])
+MIN(dim_calendar[Data])
 
 Último Período = 
-MAX(DimCalendar[Data])
+MAX(dim_calendar[Data])
 
 // Flags úteis
 Tem Dados Custos = 
@@ -397,69 +397,69 @@ IF([Registros com RH] > 0, TRUE(), FALSE())
 
 // Para tooltips
 Detalhe Instituição = 
-SELECTEDVALUE(DimInstituicao[InstituicaoNome], "Várias Instituições")
+SELECTEDVALUE(dim_instituicao[InstituicaoNome], "Várias Instituições")
 
 Tipo Instituição = 
-SELECTEDVALUE(DimInstituicao[Tipo], "Vários Tipos")
+SELECTEDVALUE(dim_instituicao[Tipo], "Vários Tipos")
 
 Região = 
-SELECTEDVALUE(DimRegiao[RegiaoNome], "Várias Regiões")
+SELECTEDVALUE(dim_regiao[RegiaoNome], "Várias Regiões")
 
 
 // ============================================================================
-// 🔟 ANÁLISE POR SAZONALIDADE (DimCalendar)
+// 🔟 ANÁLISE POR SAZONALIDADE (dim_calendar)
 // ============================================================================
 
 // Atendimentos por Estação do Ano
 Atendimentos Inverno = 
 CALCULATE(
     [Total Atendimentos],
-    DimCalendar[Sazonalidade] = "Inverno"
+    dim_calendar[Sazonalidade] = "Inverno"
 )
 
 Atendimentos Primavera = 
 CALCULATE(
     [Total Atendimentos],
-    DimCalendar[Sazonalidade] = "Primavera"
+    dim_calendar[Sazonalidade] = "Primavera"
 )
 
 Atendimentos Verão = 
 CALCULATE(
     [Total Atendimentos],
-    DimCalendar[Sazonalidade] = "Verão"
+    dim_calendar[Sazonalidade] = "Verão"
 )
 
 Atendimentos Outono = 
 CALCULATE(
     [Total Atendimentos],
-    DimCalendar[Sazonalidade] = "Outono"
+    dim_calendar[Sazonalidade] = "Outono"
 )
 
 // Análise Fim de Semana vs Dias Úteis
 Atendimentos Fim Semana = 
 CALCULATE(
-    [Total Episódios],  // Da FactMonitorizacaoSazonal (granularidade diária)
-    DimCalendar[É Fim de Semana] = TRUE()
+    [Total Episódios],  // Da fact_monitorizacao_sazonal (granularidade diária)
+    dim_calendar[É Fim de Semana] = TRUE()
 )
 
 Atendimentos Dias Úteis = 
 CALCULATE(
     [Total Episódios],
-    DimCalendar[Tipo de Dia] = "Dia Útil"
+    dim_calendar[Tipo de Dia] = "Dia Útil"
 )
 
 Atendimentos Feriados = 
 CALCULATE(
     [Total Episódios],
-    DimCalendar[É Feriado] = TRUE()
+    dim_calendar[É Feriado] = TRUE()
 )
 
 // Comparação Fim de Semana
 % Aumento Fim Semana = 
 VAR MediaFDS = DIVIDE([Atendimentos Fim Semana], 
-    CALCULATE(DISTINCTCOUNT(DimCalendar[Data]), DimCalendar[É Fim de Semana] = TRUE()), 0)
+    CALCULATE(DISTINCTCOUNT(dim_calendar[Data]), dim_calendar[É Fim de Semana] = TRUE()), 0)
 VAR MediaUtil = DIVIDE([Atendimentos Dias Úteis], 
-    CALCULATE(DISTINCTCOUNT(DimCalendar[Data]), DimCalendar[Tipo de Dia] = "Dia Útil"), 0)
+    CALCULATE(DISTINCTCOUNT(dim_calendar[Data]), dim_calendar[Tipo de Dia] = "Dia Útil"), 0)
 RETURN
     DIVIDE(MediaFDS - MediaUtil, MediaUtil, 0)
 
@@ -564,7 +564,7 @@ RETURN
 
 // Custo desperdiçado anualizado (para projeções)
 Custo Desperdiçado Anual = 
-VAR MesesComDados = DISTINCTCOUNT(FactAtendimentosUrgencia[Período])
+VAR MesesComDados = DISTINCTCOUNT(fact_atendimentos_urgencia[Período])
 VAR CustoTotal = [Custo Desperdiçado com Não Urgentes]
 RETURN
     IF(
@@ -579,13 +579,13 @@ RETURN
 // ============================================================================
 
 Total Meses = 
-DISTINCTCOUNT(FactAtendimentosUrgencia[Período])
+DISTINCTCOUNT(fact_atendimentos_urgencia[Período])
 
 Total Meses no Filtro = 
 COUNTROWS(
     SUMMARIZE(
-        FactAtendimentosUrgencia,
-        FactAtendimentosUrgencia[Período]
+        fact_atendimentos_urgencia,
+        fact_atendimentos_urgencia[Período]
     )
 )
 
@@ -625,8 +625,8 @@ RETURN
 // Verifica se há dados de RH
 Registros com RH = 
 CALCULATE(
-    COUNTROWS(FactAtendimentosUrgencia),
-    FactAtendimentosUrgencia[Médicos] > 0
+    COUNTROWS(fact_atendimentos_urgencia),
+    fact_atendimentos_urgencia[Médicos] > 0
 )
 
 Tem Dados RH = 
@@ -692,23 +692,23 @@ DIVIDE([Atendimentos Não Urgentes], [Total Atendimentos Triados], 0)
 // MELHORIA: Total de Médicos válidos (>0)
 Total Médicos Válidos = 
 CALCULATE(
-    SUM(FactAtendimentosUrgencia[Médicos]),
-    FactAtendimentosUrgencia[Médicos] > 0
+    SUM(fact_atendimentos_urgencia[Médicos]),
+    fact_atendimentos_urgencia[Médicos] > 0
 )
 
 // MELHORIA: Contagem de registros com RH válido
 Registros com RH Válido = 
 CALCULATE(
-    COUNTROWS(FactAtendimentosUrgencia),
-    FactAtendimentosUrgencia[Médicos] > 0,
-    FactAtendimentosUrgencia[Enfermeiros] > 0
+    COUNTROWS(fact_atendimentos_urgencia),
+    fact_atendimentos_urgencia[Médicos] > 0,
+    fact_atendimentos_urgencia[Enfermeiros] > 0
 )
 
 // QUALIDADE: Taxa de cobertura de dados RH
 Taxa Cobertura RH = 
 DIVIDE(
     [Registros com RH Válido],
-    COUNTROWS(FactAtendimentosUrgencia),
+    COUNTROWS(fact_atendimentos_urgencia),
     0
 )
 
@@ -717,7 +717,7 @@ Atendimentos por Médico (Válido) =
 VAR AtendimentosComRH = 
     CALCULATE(
         [Total Atendimentos],
-        FactAtendimentosUrgencia[Médicos] > 0
+        fact_atendimentos_urgencia[Médicos] > 0
     )
 VAR MedicosValidos = [Total Médicos Válidos]
 RETURN
@@ -726,21 +726,21 @@ RETURN
 // ANÁLISE: Instituições sem dados RH
 Instituições Sem RH = 
 CALCULATE(
-    DISTINCTCOUNT(FactAtendimentosUrgencia[InstituicaoID]),
-    FactAtendimentosUrgencia[Médicos] = 0,
-    FactAtendimentosUrgencia[Enfermeiros] = 0
+    DISTINCTCOUNT(fact_atendimentos_urgencia[InstituicaoID]),
+    fact_atendimentos_urgencia[Médicos] = 0,
+    fact_atendimentos_urgencia[Enfermeiros] = 0
 )
 
 // ANÁLISE: Total de registros
 Total Registros = 
-COUNTROWS(FactAtendimentosUrgencia)
+COUNTROWS(fact_atendimentos_urgencia)
 
 // BENCHMARK: Comparação com média nacional
 Desvio da Média Nacional (Não Urgentes) = 
 VAR MediaNacional = 
     CALCULATE(
         [% Não Urgentes],
-        ALL(DimInstituicao)
+        ALL(dim_instituicao)
     )
 VAR ValorAtual = [% Não Urgentes]
 RETURN

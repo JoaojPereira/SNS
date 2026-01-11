@@ -1,6 +1,6 @@
-# Report de Ineficiências nas Urgências Hospitalares - SNS Portugal
+# sns_dashboard - Análise de Ineficiências nas Urgências Hospitalares
 
-Este projeto analisa dados públicos do SNS português (**2016-2025**) para identificar padrões de ineficiência operacional, financeira e de recursos humanos nas urgências hospitalares.
+Este projeto analisa dados públicos do sns português (**2016-2025**) para identificar padrões de ineficiência operacional, financeira e de recursos humanos nas urgências hospitalares.
 
 **Período de Análise:** Janeiro 2016 - Setembro 2025 (9.75 anos de dados históricos)
 
@@ -24,59 +24,59 @@ Este projeto analisa dados públicos do SNS português (**2016-2025**) para iden
 ### Modelo Simplificado (2 Factuais + 4 Dimensões)
 
 ```
-                    DimCalendar [TimeKey]
+                    dim_calendar [TimeKey]
                            |
             ┌──────────────┼──────────────┐
             |                             |
             ↓                             ↓
-  FactAtendimentosUrgencia_Mensal  FactMonitorizacaoSazonal
+  fact_atendimentos_urgencia_mensal  fact_monitorizacao_sazonal
   (4.131 linhas, 18 colunas)       (32.870 linhas, 5 colunas)
       |              |                    |
       ↓              ↓                    ↓
-  DimRegiao     DimInstituicao       DimIndicador
+  dim_regiao     dim_instituicao       dim_indicador
 ```
 
 ### Relacionamentos (Star Schema)
 ```
-DimCalendar (1) ----(*) FactAtendimentosUrgencia_Mensal
-DimCalendar (1) ----(*) FactMonitorizacaoSazonal
+dim_calendar (1) ----(*) fact_atendimentos_urgencia_mensal
+dim_calendar (1) ----(*) fact_monitorizacao_sazonal
 
-DimInstituicao (1) ----(*) FactAtendimentosUrgencia_Mensal
-DimRegiao (1) ----(*) FactAtendimentosUrgencia_Mensal
-DimRegiao (1) ----(*) DimInstituicao
+dim_instituicao (1) ----(*) fact_atendimentos_urgencia_mensal
+dim_regiao (1) ----(*) fact_atendimentos_urgencia_mensal
+dim_regiao (1) ----(*) dim_instituicao
 
-DimIndicador (1) ----(*) FactMonitorizacaoSazonal
+dim_indicador (1) ----(*) fact_monitorizacao_sazonal
 ```
 
 ### Tabelas Fact
 
-#### 1. FactAtendimentosUrgencia_Mensal (18 colunas)
+#### 1. fact_atendimentos_urgencia_mensal (18 colunas)
 - **Chaves:** Período, TimeKey, RegiaoID, InstituicaoID (4 colunas)
 - **Triagem Manchester:** 7 cores triagem + Total (8 colunas) - **FONTE PRINCIPAL**
 - **RH:** Médicos, MedicosInternos, Enfermeiros (3 colunas)
 - **Custos:** Despesa, NumDoentes, CustoMedio (3 colunas)
 - **Cobertura:** 100% triagem Manchester | 61.9% RH | 0% custos (Estimativa aplicada: €150/episódio)
 
-#### 2. FactMonitorizacaoSazonal (5 colunas)
+#### 2. fact_monitorizacao_sazonal (5 colunas)
 - **Chaves:** Período, TimeKey, RegiaoID, IndicadorID
 - **Métrica:** Valor
 - **Granularidade:** Diária (2016-2025)
 
 ### Tabelas Dim
 
-- **DimCalendar:** TimeKey, Data, Ano, Mês, Trimestre, Feriados PT, Sazonalidade
-- **DimRegiao:** RegiaoID (1-5), Norte/Centro/LVT/Alentejo/Algarve
-- **DimInstituicao:** InstituicaoID (1-75), Nome, Tipo (ULS/CH/Hospital/CHU), RegiaoID (68 instituições ativas em 2016-2025)
-- **DimIndicador:** IndicadorID (1-4), Tempo Espera/Taxa Verde-Azul/Taxa Internamento/Nº Episódios
+- **dim_calendar:** TimeKey, Data, Ano, Mês, Trimestre, Feriados PT, Sazonalidade
+- **dim_regiao:** RegiaoID (1-5), Norte/Centro/LVT/Alentejo/Algarve
+- **dim_instituicao:** InstituicaoID (1-75), Nome, Tipo (ULS/CH/Hospital/CHU), RegiaoID (68 instituições ativas em 2016-2025)
+- **dim_indicador:** IndicadorID (1-4), Tempo Espera/Taxa Verde-Azul/Taxa Internamento/Nº Episódios
 
 ---
 
 ## Medidas DAX Disponíveis
 
 Ver ficheiro completo: 
-- `Medidas_DAX_Completas.dax` (todas as medidas: triagem Manchester, custos, RH, tempos de espera, rankings)
+- `medidas_dax_completas.dax` (todas as medidas: triagem Manchester, custos, RH, tempos de espera, rankings)
 
-### ÍNDICE DE MEDIDAS DAX (`Medidas_DAX_Completas.dax`)
+### ÍNDICE DE MEDIDAS DAX (`medidas_dax_completas.dax`)
 
 1. [Métricas Básicas de Atendimento](#1-métricas-básicas-de-atendimento)
 2. [Identificação de Urgências Falsas](#2-identificação-de-urgências-falsas)
@@ -95,14 +95,14 @@ Ver ficheiro completo:
 
 ```dax
 // Totais por cor de triagem
-Total Atendimentos = SUM(FactAtendimentosUrgencia[TotalAtendimentos])
-Atendimentos Vermelha = SUM(FactAtendimentosUrgencia[Atendimentos_Vermelha])
-Atendimentos Laranja = SUM(FactAtendimentosUrgencia[Atendimentos_Laranja])
-Atendimentos Amarela = SUM(FactAtendimentosUrgencia[Atendimentos_Amarela])
-Atendimentos Verde = SUM(FactAtendimentosUrgencia[Atendimentos_Verde])
-Atendimentos Azul = SUM(FactAtendimentosUrgencia[Atendimentos_Azul])
-Atendimentos Branca = SUM(FactAtendimentosUrgencia[Atendimentos_Branca])
-Atendimentos Sem Triagem = SUM(FactAtendimentosUrgencia[Atendimentos_SemTriagem])
+Total Atendimentos = SUM(fact_atendimentos_urgencia[TotalAtendimentos])
+Atendimentos Vermelha = SUM(fact_atendimentos_urgencia[Atendimentos_Vermelha])
+Atendimentos Laranja = SUM(fact_atendimentos_urgencia[Atendimentos_Laranja])
+Atendimentos Amarela = SUM(fact_atendimentos_urgencia[Atendimentos_Amarela])
+Atendimentos Verde = SUM(fact_atendimentos_urgencia[Atendimentos_Verde])
+Atendimentos Azul = SUM(fact_atendimentos_urgencia[Atendimentos_Azul])
+Atendimentos Branca = SUM(fact_atendimentos_urgencia[Atendimentos_Branca])
+Atendimentos Sem Triagem = SUM(fact_atendimentos_urgencia[Atendimentos_SemTriagem])
 ```
 
 ### 2. Identificação de Urgências Falsas
@@ -140,19 +140,19 @@ Status Urgências Falsas =
 ### 3. Análise de Custos e Ineficiência Financeira
 
 ```dax
-Despesa Total = SUM(FactAtendimentosUrgencia[Despesa])
+Despesa Total = SUM(fact_atendimentos_urgencia[Despesa])
 
 Custo Médio por Doente = 
     DIVIDE(
-        SUM(FactAtendimentosUrgencia[Despesa]),
-        SUM(FactAtendimentosUrgencia[NumDoentes]),
+        SUM(fact_atendimentos_urgencia[Despesa]),
+        SUM(fact_atendimentos_urgencia[NumDoentes]),
         0
     )
 
 // NOVO: Custo Médio por Doente (Direto)
 // Utiliza a média mensal já normalizada da coluna CustoMedio
 Custo Médio por Doente (Direto) = 
-    AVERAGE(FactAtendimentosUrgencia[CustoMedio])
+    AVERAGE(fact_atendimentos_urgencia[CustoMedio])
 
 Custo por Atendimento = 
     DIVIDE([Despesa Total], [Total Atendimentos], 0)
@@ -161,8 +161,8 @@ Custo por Atendimento =
 Custo Médio Nacional = 
     CALCULATE(
         [Custo Médio por Doente],
-        ALL(DimInstituicao),
-        ALL(DimRegiao)
+        ALL(dim_instituicao),
+        ALL(dim_regiao)
     )
 
 Desvio Custo vs Nacional = 
@@ -178,9 +178,9 @@ Desvio Custo vs Nacional =
 ### 4. Indicadores de Recursos Humanos
 
 ```dax
-Total Médicos = SUM(FactAtendimentosUrgencia[Médicos])
-Total Médicos Internos = SUM(FactAtendimentosUrgencia[MedicosInternos])
-Total Enfermeiros = SUM(FactAtendimentosUrgencia[Enfermeiros])
+Total Médicos = SUM(fact_atendimentos_urgencia[Médicos])
+Total Médicos Internos = SUM(fact_atendimentos_urgencia[MedicosInternos])
+Total Enfermeiros = SUM(fact_atendimentos_urgencia[Enfermeiros])
 
 Total Profissionais = 
     [Total Médicos] + [Total Médicos Internos] + [Total Enfermeiros]
@@ -332,7 +332,7 @@ Este fenómeno foi observado em Portugal e internacionalmente.
 ```dax
 Ranking Score Ineficiência = 
     RANKX(
-        ALL(DimInstituicao[InstituicaoNome]),
+        ALL(dim_instituicao[InstituicaoNome]),
         [Score Ineficiência Global],
         ,
         DESC,
@@ -341,7 +341,7 @@ Ranking Score Ineficiência =
 
 Ranking Custo por Doente = 
     RANKX(
-        ALL(DimInstituicao[InstituicaoNome]),
+        ALL(dim_instituicao[InstituicaoNome]),
         [Custo Médio por Doente],
         ,
         DESC,
@@ -350,7 +350,7 @@ Ranking Custo por Doente =
 
 Ranking Produtividade = 
     RANKX(
-        ALL(DimInstituicao[InstituicaoNome]),
+        ALL(dim_instituicao[InstituicaoNome]),
         [Atendimentos por Profissional],
         ,
         DESC,
@@ -358,10 +358,10 @@ Ranking Produtividade =
     )
 
 Top 10% Ineficientes = 
-    IF([Ranking Score Ineficiência] <= COUNTROWS(ALL(DimInstituicao)) * 0.1, "SIM", "NÃO")
+    IF([Ranking Score Ineficiência] <= COUNTROWS(ALL(dim_instituicao)) * 0.1, "SIM", "NÃO")
 
 Top 20% Produtividade = 
-    IF([Ranking Produtividade] <= COUNTROWS(ALL(DimInstituicao)) * 0.2, "SIM", "NÃO")
+    IF([Ranking Produtividade] <= COUNTROWS(ALL(dim_instituicao)) * 0.2, "SIM", "NÃO")
 ```
 
 ### 8. Score de Ineficiência Global
@@ -418,7 +418,7 @@ Status Score Global =
     IF([Rácio Enfermeiro/Médico] < 2, "SIM", "NÃO")
 
 ⚠️ Produtividade Baixa = 
-    VAR _MediaNacional = CALCULATE([Atendimentos por Profissional], ALL(DimInstituicao))
+    VAR _MediaNacional = CALCULATE([Atendimentos por Profissional], ALL(dim_instituicao))
     RETURN IF([Atendimentos por Profissional] < _MediaNacional * 0.8, "SIM", "NÃO")
 
 ⚠️ Custo Elevado = 
@@ -522,17 +522,17 @@ Tem Dados RH =
 // No Power BI Desktop: Get Data → Text/CSV
 // Importar 4 ficheiros CSV:
 // 1. FactAtendimentosUrgencia.csv
-// 2. FactMonitorizacaoSazonal.csv
-// 3. DimInstituicao.csv
-// 4. DimRegiao.csv
-// 5. DimIndicador.csv
+// 2. fact_monitorizacao_sazonal.csv
+// 3. dim_instituicao.csv
+// 4. dim_regiao.csv
+// 5. dim_indicador.csv
 // Encoding: UTF-8
 // Delimiter: ;
 ```
 
 ### Passo 2: Criar DimCalendar
 ```dax
-// Modeling → New Table → Colar código de DimCalendar.m
+// Modeling → New Table → Colar código de dim_calendar.m
 // Abrange 2016-2025 com feriados PT
 ```
 
@@ -555,7 +555,7 @@ Medidas = { BLANK() }
 
 ### Passo 5: Adicionar Medidas DAX
 ```
-1. Abrir Medidas_DAX_Completas.dax
+1. Abrir medidas_dax_completas.dax
 2. Copiar cada medida
 3. Modeling → New Measure
 4. Colar código DAX
@@ -660,21 +660,21 @@ Diferença: O SNS suporta a maior parte dos custos, cobrando apenas uma pequena 
 ## Ficheiros Principais
 
 ### Dados (Prontos para Importação)
-- ✅ `FactAtendimentosUrgencia_Mensal.csv` (4.131 registos, 2016-2025)
-- ✅ `FactMonitorizacaoSazonal.csv` (32.870 registos, 2016-2025)
-- ✅ `DimRegiao.csv` (5 regiões)
-- ✅ `DimInstituicao.csv` (75 instituições, 68 ativas)
-- ✅ `DimIndicador.csv` (4 indicadores)
+- ✅ `fact_atendimentos_urgencia_mensal.csv` (4.131 registos, 2016-2025)
+- ✅ `fact_monitorizacao_sazonal.csv` (32.870 registos, 2016-2025)
+- ✅ `dim_regiao.csv` (5 regiões)
+- ✅ `dim_instituicao.csv` (75 instituições, 68 ativas)
+- ✅ `dim_indicador.csv` (4 indicadores)
 
 ### Medidas e Documentação
 - ✅ `Relatorio_SNS.md` - **Relatório SNS** (Substitui anteriores)
-- ✅ `Medidas_DAX_Completas.dax` - 50+ medidas organizadas
+- ✅ `medidas_dax_completas.dax` - 50+ medidas organizadas
 - ✅ `Medidas_Profissionais.dax` - Análise específica de RH
-- ✅ `DimCalendar.m` - Calendário com feriados PT (2016-2025)
+- ✅ `dim_calendar.m` - Calendário com feriados PT (2016-2025)
 - ✅ `README.md` - Este ficheiro
 
 ### Scripts Histórico (Arquivo)
-- `scripts_historico/` - scripts Python de normalização executados
+- `scripts_history/` - scripts Python de normalização executados
 
 ---
 
@@ -705,14 +705,14 @@ Diferença: O SNS suporta a maior parte dos custos, cobrando apenas uma pequena 
 Para questões sobre:
 - **Dados**: Portal Transparência SNS (transparencia.sns.gov.pt)
 - **Implementação**: João Domingues Pereira
-- **Normalizações**: Consultar scripts Python em `/scripts_historico/`
+- **Normalizações**: Consultar scripts Python em `/scripts_history/`
 
 ---
 
 ## Changelog
 
 ### v3.5 - Dezembro 2025 (Atualização Final)
-- ✅ **Tabela renomeada:** `FactAtendimentosUrgencia.csv` → `FactAtendimentosUrgencia_Mensal.csv` (compatibilidade Power BI)
+- ✅ **Tabela renomeada:** `FactAtendimentosUrgencia.csv` → `fact_atendimentos_urgencia_mensal.csv` (compatibilidade Power BI)
 - ✅ **Filtro temporal rigoroso:** Apenas dados de 2016 em diante (removidos 2013-2015 fisicamente)
 - ✅ **Dados atualizados:** 4.131 registos mensais (2016-01 a 2025-09), 68 instituições ativas
 - ✅ **Monitorização atualizada:** 32.870 registos diários (até 17 Dez 2025)
