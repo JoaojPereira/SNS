@@ -1,4 +1,3 @@
-# RELATÓRIO FINAL CONSOLIDADO
 ## Análise de Ineficiências nas Urgências Hospitalares do SNS Portugal
 
 **Projeto Business Intelligence**  
