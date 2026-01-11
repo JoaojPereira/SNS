@@ -250,9 +250,7 @@ RETURN LinhasAtuais - LinhasAnteriores
 ## Suporte
 
 ### Recursos:
-- **Scripts:** Pasta `scripts_history` tem 42 scripts de referência
-- **Documentação:** `ANALISE_SCRIPTS.md` explica cada script
-- **Relatório:** `relatorio_sns.md` tem detalhes técnicos
+- **Documentação:** `ANALISE_SCRIPTS.md`
 
 ### Contactos:
 - Portal SNS: https://transparencia.sns.gov.pt
