@@ -1,0 +1,5 @@
+﻿IndicadorID;IndicadorNome;IndicadorGrupo;Unidade
+1;Tempo Médio Espera Triagem-Observação;Tempo de Espera;minutos
+2;Taxa Atendimentos Verde/Azul;Prioridade;%
+3;Taxa Atendimentos c/ Internamento;Internamento;%
+4;Nº Episódios Urgência;Volume;número
