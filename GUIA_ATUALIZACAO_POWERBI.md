@@ -21,7 +21,7 @@ Atualizar os dados do dashboard mantendo **100%** das configurações:
 ### Passo 1: Executar o Script de Atualização
 
 ```powershell
-cd "D:\Ambiente de trabalho\TransformacaoBi\sns"
+cd "D:\Ambiente de trabalho\TransformacaoBi\sns_dashboard\sns\scripts_history"
 python atualizar_dados_sns.py
 ```
 
@@ -51,9 +51,9 @@ Se preferir descarregar manualmente do portal:
 
 1. Aceder: https://transparencia.sns.gov.pt/explore/?sort=modified
 2. Procurar datasets:
-   - `csv/atendimentos_urgencia_triagem_manchester`
-   - `csv/trabalhadores_grupo_profissional`
-   - `csv/monitorizacao_sazonal_csh.csv`
+   - `sns/csv/atendimentos_urgencia_triagem_manchester`
+   - `sns/csv/trabalhadores_grupo_profissional`
+   - `sns/csv/monitorizacao_sazonal_csh.csv`
 3. Clicar em "Exportar" → "CSV" (com separador `;`)
 
 ### Passo 2: Normalizar com Script
@@ -65,9 +65,9 @@ python normalizar_csv_completo.py
 ### Passo 3: Substituir Ficheiros
 
 **IMPORTANTE:** Usar os mesmos nomes:
-- `csv/atendimentos_urgencia_triagem_manchester.csv`
-- `csv/trabalhadores_grupo_profissional.csv`
-- `csv/monitorizacao_sazonal_csh.csv`
+- `sns\csv\atendimentos_urgencia_triagem_manchester.csv`
+- `sns\csv\trabalhadores_grupo_profissional.csv`
+- `sns\csv\monitorizacao_sazonal_csh.csv`
 
 ### Passo 4: Atualizar no Power BI
 
@@ -97,7 +97,7 @@ Igual ao Método 1, Passo 2
 2. Confirmar que colunas têm nomes corretos:
    - `Vermelha`, `Laranja`, `Amarela`, `Verde`, `Azul`, `Branca`
    - NÃO usar nomes longos originais
-3. Re-executar: `python normalizar_csv_completo.py`
+3. Re-executar: `sns\scripts_history\normalizar_csv_completo.py`
 
 ### Erro: "Tipo de dados incompatível"
 
@@ -192,7 +192,7 @@ Igual ao Método 1, Passo 2
 
 ```powershell
 # Criar task mensal
-$action = New-ScheduledTaskAction -Execute "python" -Argument "atualizar_dados_sns.py" -WorkingDirectory "D:\Ambiente de trabalho\TransformacaoBi\sns"
+$action = New-ScheduledTaskAction -Execute "python" -Argument "sns\scripts_history\atualizar_dados_sns.py" -WorkingDirectory "D:\Ambiente de trabalho\TransformacaoBi\sns_dashboard\sns\scripts_history"
 $trigger = New-ScheduledTaskTrigger -Monthly -At 2am -DaysOfMonth 15
 Register-ScheduledTask -TaskName "Atualizar Dados SNS" -Action $action -Trigger $trigger
 ```
@@ -207,7 +207,7 @@ Antes de atualizar:
 - [ ] Verificar conectividade ao portal SNS
 
 Durante atualização:
-- [ ] Executar `python atualizar_dados_sns.py`
+- [ ] Executar `sns\scripts_history\atualizar_dados_sns.py`
 - [ ] Verificar mensagens de sucesso/erro
 - [ ] Confirmar que ficheiros foram criados
 
