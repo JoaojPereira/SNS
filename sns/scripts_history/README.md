@@ -88,20 +88,6 @@ Fórmulas DAX específicas para análise de recursos humanos (referência).
 
 ---
 
-## O Que Foi Eliminado?
-
-**42 scripts** obsoletos foram removidos, incluindo:
-- ✅ Scripts de normalização (integrados em atualizar_dados_sns.py)
-- ✅ Scripts de limpeza (integrados)
-- ✅ Scripts de correção pontual (já aplicadas)
-- ✅ Scripts de análise exploratória (executados uma vez)
-- ✅ Scripts de criação de dimensões (executados uma vez)
-- ✅ Conversores específicos (consolidados num genérico)
-
-**Resultado:** Manutenção 93% mais simples!
-
----
-
 ## Dependências
 
 Instalar antes de executar:
