@@ -22,17 +22,17 @@ print()
 DATASETS = {
     'atendimentos': {
         'url': 'https://transparencia.sns.gov.pt/api/explore/v2.1/catalog/datasets/atendimentos-em-urgencia-triagem-manchester/exports/csv?lang=pt&timezone=Europe%2FLisbon&use_labels=true&delimiter=%3B',
-        'nome_original': 'csv/atendimentos_urgencia_triagem_manchester.csv',
+        'nome_original': '../csv/atendimentos_urgencia_triagem_manchester.csv',
         'descricao': 'Atendimentos em Urgência - Triagem Manchester'
     },
     'trabalhadores': {
         'url': 'https://transparencia.sns.gov.pt/api/explore/v2.1/catalog/datasets/trabalhadores-por-grupo-profissional/exports/csv?lang=pt&timezone=Europe%2FLisbon&use_labels=true&delimiter=%3B',
-        'nome_original': 'csv/trabalhadores_grupo_profissional.csv',
+        'nome_original': '../csv/trabalhadores_grupo_profissional.csv',
         'descricao': 'Trabalhadores por Grupo Profissional'
     },
     'monitorizacao': {
         'url': 'https://transparencia.sns.gov.pt/api/explore/v2.1/catalog/datasets/monitorizacao-sazonal-csh/exports/csv?lang=pt&timezone=Europe%2FLisbon&use_labels=true&delimiter=%3B',
-        'nome_original': 'csv/monitorizacao_sazonal_csh.csv',
+        'nome_original': '../csv/monitorizacao_sazonal_csh.csv',
         'descricao': 'Indicadores de Monitorização Sazonal'
     }
 }
