@@ -21,13 +21,13 @@ print(f"Data: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}\n")
 print("📂 A carregar tabelas dimensão...")
 
 # Carregar dimensões
-dim_instituicao = pd.read_csv('DimInstituicao.csv', sep=';', encoding='utf-8-sig')
-dim_regiao = pd.read_csv('DimRegiao.csv', sep=';', encoding='utf-8-sig')
-dim_indicador = pd.read_csv('DimIndicador.csv', sep=';', encoding='utf-8-sig')
+dim_instituicao = pd.read_csv('csv/dim_instituicao.csv', sep=';', encoding='utf-8-sig')
+dim_regiao = pd.read_csv('csv/dim_regiao.csv', sep=';', encoding='utf-8-sig')
+dim_indicador = pd.read_csv('csv/dim_indicador.csv', sep=';', encoding='utf-8-sig')
 
-print(f"  ✓ DimInstituicao: {len(dim_instituicao)} registos")
-print(f"  ✓ DimRegiao: {len(dim_regiao)} registos")
-print(f"  ✓ DimIndicador: {len(dim_indicador)} registos")
+print(f"  ✓ dim_instituicao: {len(dim_instituicao)} registos")
+print(f"  ✓ dim_regiao: {len(dim_regiao)} registos")
+print(f"  ✓ dim_indicador: {len(dim_indicador)} registos")
 
 # Criar dicionários de mapeamento
 mapa_regioes = dict(zip(dim_regiao['RegiaoNome'], dim_regiao['RegiaoID']))
@@ -131,15 +131,15 @@ def gerar_timekey(periodo):
 # ============================================================================
 
 print("\n" + "─" * 80)
-print("📊 A processar FactAtendimentosUrgencia...")
+print("📊 A processar fact_atendimentos_urgencia...")
 print("─" * 80)
 
 try:
     # Carregar dados fonte
-    atendimentos = pd.read_csv('atendimentos-em-urgencia-triagem-manchester.csv', 
+    atendimentos = pd.read_csv('csv/atendimentos_urgencia_triagem_manchester.csv', 
                                sep=';', encoding='utf-8-sig')
     
-    trabalhadores = pd.read_csv('trabalhadores-por-grupo-profissional.csv', 
+    trabalhadores = pd.read_csv('csv/trabalhadores_grupo_profissional.csv', 
                                 sep=';', encoding='utf-8-sig')
     
     print(f"  📥 Atendimentos: {len(atendimentos)} registos")
@@ -223,34 +223,34 @@ try:
     ]
     
     # Criar backup
-    if os.path.exists('FactAtendimentosUrgencia_Mensal.csv'):
-        backup_name = f"FactAtendimentosUrgencia_Mensal.csv.backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        os.rename('FactAtendimentosUrgencia_Mensal.csv', backup_name)
+    if os.path.exists('csv/fact_atendimentos_urgencia_mensal.csv'):
+        backup_name = f"csv/fact_atendimentos_urgencia_mensal.csv.backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        os.rename('csv/fact_atendimentos_urgencia_mensal.csv', backup_name)
         print(f"  ✓ Backup criado: {backup_name}")
     
     # Salvar
-    fact_final.to_csv('FactAtendimentosUrgencia_Mensal.csv', sep=';', index=False, encoding='utf-8-sig')
+    fact_final.to_csv('csv/fact_atendimentos_urgencia_mensal.csv', sep=';', index=False, encoding='utf-8-sig')
     
-    print(f"  ✅ FactAtendimentosUrgencia_Mensal atualizada")
+    print(f"  ✅ fact_atendimentos_urgencia_mensal atualizada")
     print(f"     • Total de registos: {len(fact_final)}")
     print(f"     • Período: {fact_final['Período'].min()} até {fact_final['Período'].max()}")
     print(f"     • Instituições: {fact_final['InstituicaoID'].nunique()}")
     print(f"     • Total atendimentos: {fact_final['TotalAtendimentos'].sum():,.0f}")
 
 except Exception as e:
-    print(f"  ❌ ERRO ao processar FactAtendimentosUrgencia_Mensal: {e}")
+    print(f"  ❌ ERRO ao processar fact_atendimentos_urgencia_mensal: {e}")
 
 # ============================================================================
 # ATUALIZAÇÃO FACTMONITORIZACAOSAZONAL
 # ============================================================================
 
 print("\n" + "─" * 80)
-print("📊 A processar FactMonitorizacaosazonal...")
+print("📊 A processar fact_monitorizacao_sazonal...")
 print("─" * 80)
 
 try:
     # Carregar dados fonte
-    monitorizacao = pd.read_csv('monitorizacao-sazonal-csh.csv', 
+    monitorizacao = pd.read_csv('csv/monitorizacao_sazonal_csh.csv', 
                                 sep=';', encoding='utf-8-sig')
     
     print(f"  📥 Monitorização: {len(monitorizacao)} registos")
@@ -302,22 +302,22 @@ try:
     fact_monit = fact_monit.sort_values(['TimeKey', 'RegiaoID', 'IndicadorID'])
     
     # Criar backup
-    if os.path.exists('FactMonitorizacaosazonal.csv'):
-        backup_name = f"FactMonitorizacaosazonal.csv.backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        os.rename('FactMonitorizacaosazonal.csv', backup_name)
+    if os.path.exists('csv/fact_monitorizacao_sazonal.csv'):
+        backup_name = f"csv/fact_monitorizacao_sazonal.csv.backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        os.rename('csv/fact_monitorizacao_sazonal.csv', backup_name)
         print(f"  ✓ Backup criado: {backup_name}")
     
     # Salvar
-    fact_monit.to_csv('FactMonitorizacaosazonal.csv', sep=';', index=False, encoding='utf-8-sig')
+    fact_monit.to_csv('csv/fact_monitorizacao_sazonal.csv', sep=';', index=False, encoding='utf-8-sig')
     
-    print(f"  ✅ FactMonitorizacaosazonal atualizada")
+    print(f"  ✅ fact_monitorizacao_sazonal atualizada")
     print(f"     • Total de registos: {len(fact_monit)}")
     print(f"     • Período: {fact_monit['Período'].min()} até {fact_monit['Período'].max()}")
     print(f"     • Regiões: {fact_monit['RegiaoID'].nunique()}")
     print(f"     • Indicadores: {fact_monit['IndicadorID'].nunique()}")
 
 except Exception as e:
-    print(f"  ❌ ERRO ao processar FactMonitorizacaosazonal: {e}")
+    print(f"  ❌ ERRO ao processar fact_monitorizacao_sazonal: {e}")
 
 # ============================================================================
 # RESUMO FINAL
@@ -326,8 +326,8 @@ except Exception as e:
 print("\n" + "=" * 80)
 print("RESUMO DA ATUALIZAÇÃO")
 print("=" * 80)
-print("✅ FactAtendimentosUrgencia_Mensal: OK")
-print("✅ FactMonitorizacaosazonal: OK")
+print("✅ fact_atendimentos_urgencia_mensal: OK")
+print("✅ fact_monitorizacao_sazonal: OK")
 print("\n" + "=" * 80)
 print("✓ ATUALIZAÇÃO CONCLUÍDA")
 print("=" * 80)

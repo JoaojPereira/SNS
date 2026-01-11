@@ -67,10 +67,10 @@ Total de Registos Consolidados: ~70 mil linhas de dados brutos
 ### 1.3 Dimensões Complementares
 
 
- DimRegiao.csv         5 regiões (Norte, Centro, LVT, Alentejo, Algarve) 
- DimInstituicao.csv    76 instituições hospitalares normalizadas        
- DimIndicador.csv      4 indicadores de monitorização                    
- DimCalendar.m         Calendário com feriados portugueses (2016-2025)   
+ csv/dim_regiao.csv         5 regiões (Norte, Centro, LVT, Alentejo, Algarve) 
+ csv/dim_instituicao.csv    76 instituições hospitalares normalizadas        
+ csv/dim_indicador.csv      4 indicadores de monitorização                    
+ modules/dim_calendar.m         Calendário com feriados portugueses (2016-2025)   
 
 
 
