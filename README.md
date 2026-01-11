@@ -803,10 +803,11 @@ Para questões sobre:
 
 ---
 
-## ⚖️ Licença e Termos de Uso
+## ⚖️ Licença
 
-Dados públicos do **Portal da Transparência do SNS**.  
-Uso permitido para fins de análise, auditoria e melhoria dos serviços de saúde.
+**MIT License** - Ver arquivo [LICENSE](LICENSE) para mais detalhes.
+
+**Dados:** Os dados utilizados neste projeto são públicos e provenientes do **Portal da Transparência do SNS** (https://transparencia.sns.gov.pt/).
 
 ---
 

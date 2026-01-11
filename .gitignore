@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+
+# Backups
+Backup/
+*.backup_*
+*.bak
+
+# Power BI
+*.pbix.tmp
+*.pbix.autosave
+
+# Dados temporários
+Dataset_original/
+
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Logs
+*.log
