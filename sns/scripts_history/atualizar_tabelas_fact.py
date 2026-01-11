@@ -21,9 +21,9 @@ print(f"Data: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}\n")
 print("📂 A carregar tabelas dimensão...")
 
 # Carregar dimensões
-dim_instituicao = pd.read_csv('csv/dim_instituicao.csv', sep=';', encoding='utf-8-sig')
-dim_regiao = pd.read_csv('csv/dim_regiao.csv', sep=';', encoding='utf-8-sig')
-dim_indicador = pd.read_csv('csv/dim_indicador.csv', sep=';', encoding='utf-8-sig')
+dim_instituicao = pd.read_csv('../csv/dim_instituicao.csv', sep=';', encoding='utf-8-sig')
+dim_regiao = pd.read_csv('../csv/dim_regiao.csv', sep=';', encoding='utf-8-sig')
+dim_indicador = pd.read_csv('../csv/dim_indicador.csv', sep=';', encoding='utf-8-sig')
 
 print(f"  ✓ dim_instituicao: {len(dim_instituicao)} registos")
 print(f"  ✓ dim_regiao: {len(dim_regiao)} registos")
@@ -229,7 +229,7 @@ try:
         print(f"  ✓ Backup criado: {backup_name}")
     
     # Salvar
-    fact_final.to_csv('csv/fact_atendimentos_urgencia_mensal.csv', sep=';', index=False, encoding='utf-8-sig')
+    fact_final.to_csv('../csv/fact_atendimentos_urgencia_mensal.csv', sep=';', index=False, encoding='utf-8-sig')
     
     print(f"  ✅ fact_atendimentos_urgencia_mensal atualizada")
     print(f"     • Total de registos: {len(fact_final)}")
