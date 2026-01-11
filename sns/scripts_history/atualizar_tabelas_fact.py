@@ -136,10 +136,10 @@ print("─" * 80)
 
 try:
     # Carregar dados fonte
-    atendimentos = pd.read_csv('csv/atendimentos_urgencia_triagem_manchester.csv', 
+    atendimentos = pd.read_csv('../csv/atendimentos_urgencia_triagem_manchester.csv', 
                                sep=';', encoding='utf-8-sig')
     
-    trabalhadores = pd.read_csv('csv/trabalhadores_grupo_profissional.csv', 
+    trabalhadores = pd.read_csv('../csv/trabalhadores_grupo_profissional.csv', 
                                 sep=';', encoding='utf-8-sig')
     
     print(f"  📥 Atendimentos: {len(atendimentos)} registos")
@@ -223,9 +223,9 @@ try:
     ]
     
     # Criar backup
-    if os.path.exists('csv/fact_atendimentos_urgencia_mensal.csv'):
-        backup_name = f"csv/fact_atendimentos_urgencia_mensal.csv.backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        os.rename('csv/fact_atendimentos_urgencia_mensal.csv', backup_name)
+    if os.path.exists('../csv/fact_atendimentos_urgencia_mensal.csv'):
+        backup_name = f"../csv/fact_atendimentos_urgencia_mensal.csv.backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        os.rename('../csv/fact_atendimentos_urgencia_mensal.csv', backup_name)
         print(f"  ✓ Backup criado: {backup_name}")
     
     # Salvar
@@ -250,7 +250,7 @@ print("─" * 80)
 
 try:
     # Carregar dados fonte
-    monitorizacao = pd.read_csv('csv/monitorizacao_sazonal_csh.csv', 
+    monitorizacao = pd.read_csv('../csv/monitorizacao_sazonal_csh.csv', 
                                 sep=';', encoding='utf-8-sig')
     
     print(f"  📥 Monitorização: {len(monitorizacao)} registos")
@@ -302,13 +302,13 @@ try:
     fact_monit = fact_monit.sort_values(['TimeKey', 'RegiaoID', 'IndicadorID'])
     
     # Criar backup
-    if os.path.exists('csv/fact_monitorizacao_sazonal.csv'):
-        backup_name = f"csv/fact_monitorizacao_sazonal.csv.backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        os.rename('csv/fact_monitorizacao_sazonal.csv', backup_name)
+    if os.path.exists('../csv/fact_monitorizacao_sazonal.csv'):
+        backup_name = f"../csv/fact_monitorizacao_sazonal.csv.backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        os.rename('../csv/fact_monitorizacao_sazonal.csv', backup_name)
         print(f"  ✓ Backup criado: {backup_name}")
     
     # Salvar
-    fact_monit.to_csv('csv/fact_monitorizacao_sazonal.csv', sep=';', index=False, encoding='utf-8-sig')
+    fact_monit.to_csv('../csv/fact_monitorizacao_sazonal.csv', sep=';', index=False, encoding='utf-8-sig')
     
     print(f"  ✅ fact_monitorizacao_sazonal atualizada")
     print(f"     • Total de registos: {len(fact_monit)}")

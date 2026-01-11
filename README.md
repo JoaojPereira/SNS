@@ -74,9 +74,9 @@ dim_indicador (1) ----(*) fact_monitorizacao_sazonal
 ## Medidas DAX Disponíveis
 
 Ver ficheiro completo: 
-- `medidas_dax_completas.dax` (todas as medidas: triagem Manchester, custos, RH, tempos de espera, rankings)
+- `dax/medidas_dax_completas.dax` (todas as medidas: triagem Manchester, custos, RH, tempos de espera, rankings)
 
-### ÍNDICE DE MEDIDAS DAX (`medidas_dax_completas.dax`)
+### ÍNDICE DE MEDIDAS DAX (`dax/medidas_dax_completas.dax`)
 
 1. [Métricas Básicas de Atendimento](#1-métricas-básicas-de-atendimento)
 2. [Identificação de Urgências Falsas](#2-identificação-de-urgências-falsas)
@@ -555,7 +555,7 @@ Medidas = { BLANK() }
 
 ### Passo 5: Adicionar Medidas DAX
 ```
-1. Abrir medidas_dax_completas.dax
+1. Abrir `dax/medidas_dax_completas.dax`
 2. Copiar cada medida
 3. Modeling → New Measure
 4. Colar código DAX
@@ -667,9 +667,9 @@ Diferença: O SNS suporta a maior parte dos custos, cobrando apenas uma pequena 
 - ✅ `dim_indicador.csv` (4 indicadores)
 
 ### Medidas e Documentação
-- ✅ `Relatorio_SNS.md` - **Relatório SNS** (Substitui anteriores)
-- ✅ `medidas_dax_completas.dax` - 50+ medidas organizadas
-- ✅ `Medidas_Profissionais.dax` - Análise específica de RH
+- ✅ `relatorio_sns.md` - **Relatório SNS** (Substitui anteriores)
+- ✅ `dax/medidas_dax_completas.dax` - 50+ medidas organizadas
+- ✅ `dax/medidas_profissionais.dax` - Análise específica de RH
 - ✅ `dim_calendar.m` - Calendário com feriados PT (2016-2025)
 - ✅ `README.md` - Este ficheiro
 
@@ -720,7 +720,7 @@ Para questões sobre:
 - ✅ **Automação completa:** Pipeline de atualização automática com backups
 
 ### v3.4 - Dezembro 2025
-- ✅ **Relatório Unificado:** Criação de `Relatorio_SNS.md` agregando toda a documentação.
+- ✅ **Relatório Unificado:** Criação de `relatorio_sns.md` agregando toda a documentação.
 - ✅ **Filtro Temporal Rigoroso:** Dados filtrados estritamente para 2016-2025 (excluindo 2013-2015).
 - ✅ **Justificação de Custos:** Documentação explícita da exclusão da tabela de custos reais (cobertura 5.3%) em favor do modelo estimativo.
 - ✅ **Atualização de Contagens:** FactAtendimentosUrgencia_Mensal (4.131 linhas) e FactMonitorizacaoSazonal (32.870 linhas).
