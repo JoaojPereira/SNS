@@ -1,12 +1,12 @@
-# 📂 Scripts Essenciais
+# Scripts Essenciais
 
 Esta pasta contém apenas os **3 scripts essenciais** para manutenção do projeto.
 
 ---
 
-## ✅ Scripts Ativos
+## Scripts Ativos
 
-### 1️⃣ `atualizar_dados_sns.py` ⭐
+### `atualizar_dados_sns.py`
 **Função:** Download automático e normalização de dados do Portal da Transparência SNS
 
 **O que faz:**
@@ -29,7 +29,7 @@ python atualizar_dados_sns.py
 
 ---
 
-### 2️⃣ `atualizar_tabelas_fact.py` ⭐
+### `atualizar_tabelas_fact.py`
 **Função:** Atualiza as tabelas Fact do modelo Star Schema
 
 **O que faz:**
@@ -52,7 +52,7 @@ python atualizar_tabelas_fact.py
 
 ---
 
-### 3️⃣ `converter_md_to_html.py`
+### `converter_md_to_html.py`
 **Função:** Converte ficheiros Markdown para HTML com estilos
 
 **O que faz:**
@@ -71,7 +71,7 @@ python converter_md_to_html.py
 
 ---
 
-## 🗂️ Ficheiros de Suporte
+## Ficheiros de Suporte
 
 ### `ANALISE_SCRIPTS.md`
 Documento de análise que identificou scripts redundantes e justifica a consolidação.
@@ -81,7 +81,7 @@ Fórmulas DAX específicas para análise de recursos humanos (referência).
 
 ---
 
-## 🎯 Workflow de Atualização Completa
+## Workflow de Atualização Completa
 
 ```
 1. python atualizar_dados_sns.py        → Descarrega dados novos
@@ -91,7 +91,7 @@ Fórmulas DAX específicas para análise de recursos humanos (referência).
 
 ---
 
-## 📋 O Que Foi Eliminado?
+## O Que Foi Eliminado?
 
 **42 scripts** obsoletos foram removidos, incluindo:
 - ✅ Scripts de normalização (integrados em atualizar_dados_sns.py)
@@ -105,7 +105,7 @@ Fórmulas DAX específicas para análise de recursos humanos (referência).
 
 ---
 
-## 🔄 Dependências
+## Dependências
 
 Instalar antes de executar:
 ```powershell
@@ -119,11 +119,11 @@ Ou ativar o ambiente virtual:
 
 ---
 
-## 📞 Suporte
+## Suporte
 
 Para adicionar novos scripts ou modificar os existentes, consulte a documentação principal no README.md da raiz do projeto.
 
 ---
 
 **Última atualização:** 20/12/2025  
-**Consolidação:** De 45 scripts para 3 essenciais ✅
+**Consolidação:** De 45 scripts para 3 essenciais
