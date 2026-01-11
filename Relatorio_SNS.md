@@ -118,6 +118,3 @@ A consolidação dos dados confirma que o SNS enfrenta um problema estrutural de
 1.  **Desvio de Procura:** Implementar triagem pré-hospitalar rigorosa (SNS24) para reduzir os 41,93% de casos não urgentes.
 2.  **Reforço de Enfermagem:** Priorizar contratações para atingir o rácio mínimo de 2.0 enfermeiros/médico.
 3.  **Monitorização Contínua:** Utilizar o dashboard desenvolvido para acompanhamento mensal, focando nas 27 instituições identificadas como críticas (taxa de não urgentes > 45%).
-
----
-*Este relatório substitui e consolida os documentos anteriores: "Relatorio_SNS.md", "Relatorio_Normalizacao_CSV.md" e "Relatório Consolidado.md".*
