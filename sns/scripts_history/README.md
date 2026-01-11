@@ -73,9 +73,6 @@ python converter_md_to_html.py
 
 ## Ficheiros de Suporte
 
-### `ANALISE_SCRIPTS.md`
-Documento de análise que identificou scripts redundantes e justifica a consolidação.
-
 ### `dax/medidas_profissionais.dax`
 Fórmulas DAX específicas para análise de recursos humanos (referência).
 
