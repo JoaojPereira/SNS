@@ -1,6 +1,4 @@
-# 🏥 Report de Ineficiências nas Urgências Hospitalares - SNS Portugal
-
-## 📊 Dashboard de Análise de Ineficiências no Sistema Nacional de Saúde
+# Report de Ineficiências nas Urgências Hospitalares - SNS Portugal
 
 Este projeto analisa dados públicos do SNS português (**2016-2025**) para identificar padrões de ineficiência operacional, financeira e de recursos humanos nas urgências hospitalares.
 
@@ -8,7 +6,7 @@ Este projeto analisa dados públicos do SNS português (**2016-2025**) para iden
 
 ---
 
-## 📁 Fonte dos Dados
+## Fonte dos Dados
 
 **Portal da Transparência do SNS**  
 🔗 https://transparencia.sns.gov.pt/explore/?sort=modified
@@ -21,9 +19,9 @@ Este projeto analisa dados públicos do SNS português (**2016-2025**) para iden
 
 ---
 
-## 🗂️ Estrutura do Modelo de Dados (Star Schema)
+## Estrutura do Modelo de Dados (Star Schema)
 
-### ⭐ Modelo Simplificado (2 Factuais + 4 Dimensões)
+### Modelo Simplificado (2 Factuais + 4 Dimensões)
 
 ```
                     DimCalendar [TimeKey]
@@ -50,7 +48,7 @@ DimRegiao (1) ----(*) DimInstituicao
 DimIndicador (1) ----(*) FactMonitorizacaoSazonal
 ```
 
-### 📊 Tabelas Fact
+### Tabelas Fact
 
 #### 1. FactAtendimentosUrgencia_Mensal (18 colunas)
 - **Chaves:** Período, TimeKey, RegiaoID, InstituicaoID (4 colunas)
@@ -64,7 +62,7 @@ DimIndicador (1) ----(*) FactMonitorizacaoSazonal
 - **Métrica:** Valor
 - **Granularidade:** Diária (2016-2025)
 
-### 📐 Dimensões
+### Tabelas Dim
 
 - **DimCalendar:** TimeKey, Data, Ano, Mês, Trimestre, Feriados PT, Sazonalidade
 - **DimRegiao:** RegiaoID (1-5), Norte/Centro/LVT/Alentejo/Algarve
@@ -73,12 +71,12 @@ DimIndicador (1) ----(*) FactMonitorizacaoSazonal
 
 ---
 
-## 📊 Medidas DAX Disponíveis
+## Medidas DAX Disponíveis
 
 Ver ficheiro completo: 
 - `Medidas_DAX_Completas.dax` (todas as medidas: triagem Manchester, custos, RH, tempos de espera, rankings)
 
-### 📑 ÍNDICE DE MEDIDAS DAX (`Medidas_DAX_Completas.dax`)
+### ÍNDICE DE MEDIDAS DAX (`Medidas_DAX_Completas.dax`)
 
 1. [Métricas Básicas de Atendimento](#1-métricas-básicas-de-atendimento)
 2. [Identificação de Urgências Falsas](#2-identificação-de-urgências-falsas)
@@ -325,7 +323,9 @@ Atendimentos Verão =
 
 ---
 **Nota sobre 2020-2021:**  
-A queda significativa no número de atendimentos de urgência em 2020 e 2021 coincide com o início da pandemia de COVID-19. Durante este período, restrições de circulação, receio da população em procurar hospitais e mudanças nos protocolos hospitalares resultaram numa redução das idas às urgências, especialmente por motivos não graves. Este fenómeno foi observado em Portugal e internacionalmente.
+A queda significativa no número de atendimentos de urgência em 2020 e 2021 coincide com o início da pandemia de COVID-19. Durante este período, restrições de circulação,
+receio da população em procurar hospitais e mudanças nos protocolos hospitalares resultaram numa redução das idas às urgências, especialmente por motivos não graves. 
+Este fenómeno foi observado em Portugal e internacionalmente.
 
 ### 7. Rankings e Benchmarking
 
@@ -468,69 +468,31 @@ Tem Dados RH =
 
 ---
 
-## 📈 Estrutura do Dashboard Implementado
+## Estrutura do Dashboard Implementado
 
 ### 1. Página Executiva 🎯
 **Objetivo:** Visão macro para administração e decisores políticos.
-**Visuais:**
-- **KPI Cards:** Total Atendimentos, Custo Desperdiçado, Tempo Espera Médio, Status Urgências Falsas.
-- **Table:** "Orçamentos da Saúde (2016-2025)" (Comparação Orçamento vs Variação YoY).
-- **Clustered Column Chart:** "Evolução Anual" (Total, Urgentes, Não Urgentes).
-- **Slicers:** Ano e Região.
 
 ### 2. Página Operacional ⚙️
 **Objetivo:** Monitorização detalhada por instituição.
-**Visuais:**
-- **Table Detalhada:** Lista de instituições com indicadores visuais (ícones):
-  - Status Rácio Enf/Med (✅ Ideal, ⚠️ Excesso, ❌ Défice).
-  - Volume de Atendimentos Não Urgentes.
-  - Status Urgências Falsas (❌ Crítico, ⚠️ Atenção).
-- **Bookmark:** Alternância de vistas para foco em indicadores específicos.
 
 ### 3. Página Financeira 💰
 **Objetivo:** Análise do impacto financeiro e desperdício.
-**Visuais:**
-- **Clustered Column Chart:** "Despesa total estimada e desperdício potencial por ano" (Comparação direta por período).
-- **Stacked Bar Chart:** "Despesa Estimada vs Desperdício por Instituição" (Ranking de quem desperdiça mais).
-- **KPI Cards:** Custo Desperdiçado Total (€15.1B), % Não Urgentes (41,93%).
 
 ### 4. Página Recursos Humanos 👥
 **Objetivo:** Análise de equipas e produtividade.
-**Visuais:**
-- **Line Chart:** "Profissionais por ano" (Evolução de Médicos, Internos e Enfermeiros).
-- **Bar Chart:** "Atendimentos por médico e por instituição" (Produtividade vs Média Nacional).
-- **KPI Cards:** Total Profissionais, Rácio Enf/Médico (2,62), Atendimentos por Médico (287), % Espera > 1h.
 
 ### 5. Página Sazonalidade 📅
-**Objetivo:** Padrões temporais e planeamento.
-**Visuais (Vista 1):**
-- **Line Chart:** "Tempo Espera Médio" (Evolução mensal).
-- **Slope/Line Chart:** "Tempo médio de espera por Região".
-**Visuais (Vista 2 - Bookmark):**
-- **Pie Chart:** "Atendimentos por dias úteis, feriados e fins de semana".
-- **Line Chart:** "Atendimentos por triagem de manchester" (Tendência de cores).
-- **Table:** "Picos de atendimentos" (Sazonalidade por Região: Inverno/Verão).
 
-### 6. Página Qualidade de Dados 📊
-**Objetivo:** Transparência sobre completude e integridade dos dados.
-**Visuais:**
-- **Cards:** Taxa Cobertura RH (61,92%), Total Registros (4.131), Registros com RH Válido (2.558), Instituições Sem RH (20).
-- **Tabela:** "Análise de Qualidade por Instituição" com colunas: InstituicaoNome, Validação Total Atendimentos, Taxa Cobertura RH, Total Atendimentos.
-- **Gráfico de Barras:** "Instituições sem Dados de Recursos Humanos" mostrando volume de atendimentos em hospitais sem dados RH.
-- **Nota:** Texto explicativo sobre limitações e dados ausentes.
-**Formatação Condicional:**
-- Taxa Cobertura RH: Verde (>60%), Amarelo (30-60%), Vermelho (<30%)
-
-### 7. Página Rankings 🏆
+### 6. Página Rankings 🏆
 **Objetivo:** Benchmarking e Score Global.
-**Visuais:**
-- **Gauge Chart:** "Score Ineficiência Global" (Velocímetro 0-100).
-- **Table Heatmap:** "Avaliação por instituição" (Ineficiência Global, % N.Urg, Produtividade).
-- **KPI Cards:** Alertas Críticos (Status), Classificação Global.
+
+### 7. Página Qualidade de Dados 📊
+**Objetivo:** Transparência sobre completude e integridade dos dados.
 
 ---
 
-## 📊 Formatação Condicional Recomendada
+## Formatação Condicional Recomendada
 
 ### Tabelas/Matrix
 
@@ -553,7 +515,7 @@ Tem Dados RH =
 
 ---
 
-## 🚀 Guia de Implementação Rápida
+## Guia de Implementação Rápida
 
 ### Passo 1: Importar Dados
 ```powerquery
@@ -667,7 +629,7 @@ Configurar Row-Level Security se necessário
 
 ---
 
-## ⚠️ Limitações e Notas
+## Limitações e Notas
 
 - **Custos:** Média calculada de 150 euros por episódio de urgência.
 Custo Real para o SNS (valor de referência)
@@ -695,7 +657,7 @@ Diferença: O SNS suporta a maior parte dos custos, cobrando apenas uma pequena 
 
 ---
 
-## 📂 Ficheiros Principais
+## Ficheiros Principais
 
 ### Dados (Prontos para Importação)
 - ✅ `FactAtendimentosUrgencia_Mensal.csv` (4.131 registos, 2016-2025)
@@ -716,7 +678,7 @@ Diferença: O SNS suporta a maior parte dos custos, cobrando apenas uma pequena 
 
 ---
 
-## 🎯 Indicadores de Ineficiência
+## Indicadores de Ineficiência
 
 1. **Urgências Falsas**: % Verde/Azul/Branca
    - Meta: < 30%
@@ -738,7 +700,7 @@ Diferença: O SNS suporta a maior parte dos custos, cobrando apenas uma pequena 
 
 ---
 
-## 📞 Suporte e Contacto
+## Suporte e Contacto
 
 Para questões sobre:
 - **Dados**: Portal Transparência SNS (transparencia.sns.gov.pt)
@@ -747,9 +709,7 @@ Para questões sobre:
 
 ---
 
-### 📋 Changelog
-
-## 📋 Changelog
+## Changelog
 
 ### v3.5 - Dezembro 2025 (Atualização Final)
 - ✅ **Tabela renomeada:** `FactAtendimentosUrgencia.csv` → `FactAtendimentosUrgencia_Mensal.csv` (compatibilidade Power BI)
@@ -803,7 +763,7 @@ Para questões sobre:
 
 ---
 
-## ⚖️ Licença
+## Licença e Termos de Uso
 
 **MIT License** - Ver arquivo [LICENSE](LICENSE) para mais detalhes.
 
@@ -816,7 +776,7 @@ Para questões sobre:
 **Autor:** João Domingues Pereira - Projeto business intelligence SNS  
 **Período de Dados:** 2016-2025 (9.75 anos)
 
-## ❗ Nota sobre custos
+## Nota sobre custos
 
 A tabela original de custos (`custo-de-tratamento-mensal-por-doente.csv`) foi removida do relatório principal devido à baixa cobertura de dados, especialmente nos anos mais recentes, o que poderia levar a interpretações erradas.
 
