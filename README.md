@@ -1,4 +1,4 @@
-#Análise de Ineficiências nas Urgências Hospitalares
+Análise de Ineficiências nas Urgências Hospitalares
 
 Este projeto analisa dados públicos do sns português (**2016-2025**) para identificar padrões de ineficiência operacional, financeira e de recursos humanos nas urgências hospitalares.
 
