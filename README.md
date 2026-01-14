@@ -2,7 +2,7 @@
 
 Este projeto analisa dados públicos do sns português (**2016-2025**) para identificar padrões de ineficiência operacional, financeira e de recursos humanos nas urgências hospitalares.
 
-**Período de Análise:** Janeiro 2016 - Setembro 2025 (9.75 anos de dados históricos)
+**Período de Análise:** Setembro 2016 - Dezembro 2025 (9.75 anos de dados históricos)
 
 ---
 
